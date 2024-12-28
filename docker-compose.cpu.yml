@@ -1,0 +1,61 @@
+services:
+  streamlit:
+    image: condaforge/miniforge3:24.9.2-0
+    restart: always
+    volumes:
+      - ./services/streamlit/:/app
+      - ./services/streamlit/envs/:/opt/conda/envs
+      - ./services/streamlit/.conda-cache:/opt/conda/pkgs
+    working_dir: /app
+    command: bash start.sh
+    ports:
+      - 8501:8501 # UI
+      - 8000:8000 # API 
+    environment:
+      - WORKER_COUNT=1
+  ollama:
+    image: ollama/ollama:0.5.1
+    container_name: ollama
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com/
+      - OLLAMA_DEBUG=1
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_ORIGINS="*"
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ./open-webui/ollama:/root/.ollama
+    #ports:
+    #  - "11434:11434"
+    restart: always
+  clear-voice:
+    image: condaforge/miniforge3:24.9.2-0
+    restart: always
+    volumes:
+      - ./services/clear-voice/:/app
+      - ./services/clear-voice/envs/:/opt/conda/envs
+      - ./services/clear-voice/.conda-cache:/opt/conda/pkgs
+      - ./services/clear-voice/.cache/:/root/.cache/ # modelscope and huggingface
+    working_dir: /app
+    command: tail -f /dev/null
+    # command: bash start.sh
+    environment:
+      - WORKER_COUNT=${WORKER_COUNT:-1}
+    ports:
+      - 8502:8501
+      - 8503:8000
+  funasr:
+    image: condaforge/miniforge3:24.9.2-0
+    restart: always
+    volumes:
+      - ./services/funasr/:/app
+      - ./services/funasr/envs/:/opt/conda/envs
+      - ./services/funasr/.conda-cache:/opt/conda/pkgs
+      - ./services/funasr/.cache/:/root/.cache/ # modelscope and huggingface
+    working_dir: /app
+    # command: tail -f /dev/null
+    command: bash start.sh
+    environment:
+      - WORKER_COUNT=${WORKER_COUNT:-1}
+    # ports:
+    #   - 8502:8501
+    #   - 8503:8000
