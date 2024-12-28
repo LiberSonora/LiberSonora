@@ -15,7 +15,6 @@ services:
       - WORKER_COUNT=1
   ollama:
     image: ollama/ollama:0.5.1
-    container_name: ollama
     environment:
       - HF_ENDPOINT=https://hf-mirror.com/
       - CUDA_VISIBLE_DEVICES=0

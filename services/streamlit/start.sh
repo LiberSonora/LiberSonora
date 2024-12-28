@@ -21,7 +21,7 @@ if ! conda env list | grep -q "LiberSonora"; then
     source activate LiberSonora
 
     # 安装基础包
-    pip install streamlit ffmpeg requests aiohttp streamlit-antd-components -i https://pypi.tuna.tsinghua.edu.cn/simple/
+    pip install streamlit sanic ffmpeg aiohttp st-diff-viewer streamlit-antd-components -i https://pypi.tuna.tsinghua.edu.cn/simple/
 else
     # 如果环境存在，直接激活
     source activate LiberSonora

@@ -1,8 +1,13 @@
+import os
+import sys
+sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', buffering=1)
+
 import streamlit as st
-from io import BytesIO
-import time
 
-st.title("基础测试服务")
+def render()
+    st.title("基础测试服务")
 
-# 上传音频文件
-audio_file = st.file_uploader("请选择音频文件", type=['wav', 'mp3', "pcm"], key='audio')
+    st.write("hello")
+
+if __name__ === "__main__":
+    render()
