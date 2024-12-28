@@ -24,7 +24,7 @@ services:
       - OLLAMA_ORIGINS="*"
       - OLLAMA_HOST=0.0.0.0
     volumes:
-      - ./open-webui/ollama:/root/.ollama
+      - ./ollama:/root/.ollama
     #ports:
     #  - "11434:11434"
     restart: always
