@@ -3,7 +3,7 @@ from typing import List
 from .openai import OpenAIHandler
 
 class TextCorrector:
-    def __init__(self, openai_handler: OpenAIHandler, batch_size: int = 50, context_size: int = 8):
+    def __init__(self, openai_handler: OpenAIHandler, batch_size: int = 20, context_size: int = 4):
         self.openai_handler = openai_handler
         self.batch_size = batch_size
         self.context_size = context_size
@@ -81,20 +81,18 @@ class TextCorrector:
 
 
 class TitleGenerator:
-    def __init__(self, openai_handler: OpenAIHandler, book_name: str, author: str, min_length: int = 5, max_length: int = 10):
+    def __init__(self, openai_handler: OpenAIHandler, book_name: str = "", author: str = ""):
         self.openai_handler = openai_handler
-        self.book_name = book_name
-        self.author = author
-        self.min_length = min_length
-        self.max_length = max_length
+        self.book_name = book_name if book_name else "unknown"
+        self.author = author if author else "unknown"
 
     def _create_sysprompt(self) -> str:
         return (
             f"You are a professional title generation expert responsible for creating concise section titles for the book '{self.book_name}' by {self.author}.\n\n"
-            f"Task: Generate a section title with {self.min_length}-{self.max_length} Chinese characters based on the provided text content.\n"
+            f"Task: Generate a section title with 5-10 Chinese characters based on the provided text content.\n"
             f"Requirements:\n"
             f"1. The title must accurately summarize the text content\n"
-            f"2. The title length must strictly be between {self.min_length}-{self.max_length} Chinese characters\n"
+            f"2. The title length must strictly be between 5-10 Chinese characters\n"
             f"3. The title must not contain any punctuation marks\n"
             f"4. The title should be concise and highlight key points\n"
             f"5. The title must not contain '章' or '节' etc.\n\n"

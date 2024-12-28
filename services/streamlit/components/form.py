@@ -53,12 +53,13 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
         )
     else:
         # 模型选择单选，显示name，返回model
-        model_options = [(config["name"], config["model"]) for config in MODEL_CONFIGS]
+        model_options = [(config['name'], config["model"], config['comment']) for config in MODEL_CONFIGS]
         selected = st.radio(
             "请选择模型",
             options=[option[0] for option in model_options],
             index=next(i for i, option in enumerate(model_options) if option[1] == st.session_state[config_key]['model']),
-            key=f'{key_prefix}_model_radio'
+            key=f'{key_prefix}_model_radio',
+            captions=[option[2] for option in model_options]
         )
         model = next(option[1] for option in model_options if option[0] == selected)
     
