@@ -7,6 +7,7 @@ services:
       - ./services/streamlit/envs/:/opt/conda/envs
       - ./services/streamlit/.conda-cache:/opt/conda/pkgs
     working_dir: /app
+    # command: tail -f /dev/null
     command: bash start.sh
     ports:
       - 8651:8501 # UI

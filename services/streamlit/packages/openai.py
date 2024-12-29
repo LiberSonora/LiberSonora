@@ -19,6 +19,18 @@ class OpenAIHandler:
         self.openai_key = openai_key
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+    def get_config(self) -> dict:
+        """
+        获取当前配置
+        
+        返回:
+            dict: 包含模型、API地址和API密钥的字典
+        """
+        return {
+            "model": self.model,
+            "openai_url": self.openai_url,
+            "openai_key": self.openai_key
+        }
 
     async def request(self, messages: list, model: str = None, temp: float = 0.7, validator_callback=None) -> str:
         """

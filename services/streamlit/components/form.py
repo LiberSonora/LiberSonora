@@ -4,31 +4,10 @@ import pandas as pd
 from packages.llm import MODEL_CONFIGS
 from packages.ollama import OllamaHandler
 from packages.openai import OpenAIHandler
+import asyncio
 
-async def model_selection(key_prefix: str = "default", default_model: str = None):
-    """大模型选择组件
-    
-    参数:
-        key_prefix: 用于拼接st组件key的前缀，默认为"default"
-        default_model: 默认模型名称，如果未提供则使用MODEL_CONFIGS中的第一个模型
-    
-    返回:
-        model: 选择的模型名称
-        use_ollama: 是否使用ollama
-        openai_url: API基础地址
-        openai_key: API密钥
-    """
-    
-    # 初始化session_state中的配置项，按key_prefix区分
-    config_key = f'llm_config_{key_prefix}'
-    if config_key not in st.session_state:
-        st.session_state[config_key] = {
-            'model': default_model or MODEL_CONFIGS[0]['model'],
-            'use_ollama': True,
-            'openai_url': "http://ollama:11434",
-            'openai_key': ""
-        }
-    
+@st.dialog("配置大模型参数")
+def config_dialog(key_prefix, config_key):
     # 使用ollama勾选框
     use_ollama = st.checkbox(
         "使用Ollama", 
@@ -37,11 +16,30 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
         key=f'{key_prefix}_use_ollama'
     )
     st.session_state[config_key]['use_ollama'] = use_ollama
+
+    # API地址输入
+    openai_url = st.text_input(
+        "API地址", 
+        help="http://ollama:11434 是本机 ollama docker 地址，可替换为 deepseek/openai 等地址连接外部 API",
+        value=st.session_state[config_key]['openai_url'],
+        key=f'{key_prefix}_openai_url'
+    )
+    st.session_state[config_key]['openai_url'] = openai_url
+    
+    # API密钥输入
+    openai_key = st.text_input(
+        "API密钥", 
+        value=st.session_state[config_key]['openai_key'],
+        type="password",
+        key=f'{key_prefix}_openai_key'
+    )
+    st.session_state[config_key]['openai_key'] = openai_key
     
     # 自定义模型勾选框
     custom_model = st.checkbox(
         "自定义模型名称",
-        key=f'{key_prefix}_custom_model'
+        key=f'{key_prefix}_custom_model',
+        help="可替换为更大的 ollama 模型或 deepseek 等提升质量，连接外部模型时需要先修改 API 地址"
     )
     
     if custom_model:
@@ -64,38 +62,57 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
         model = next(option[1] for option in model_options if option[0] == selected)
     
     st.session_state[config_key]['model'] = model
-    
-    # API地址输入
-    openai_url = st.text_input(
-        "API地址", 
-        value=st.session_state[config_key]['openai_url'],
-        key=f'{key_prefix}_openai_url'
-    )
-    st.session_state[config_key]['openai_url'] = openai_url
-    
-    # API密钥输入
-    openai_key = st.text_input(
-        "API密钥", 
-        value=st.session_state[config_key]['openai_key'],
-        type="password",
-        key=f'{key_prefix}_openai_key'
-    )
-    st.session_state[config_key]['openai_key'] = openai_key
 
-    if use_ollama:
-        ollama_handler = OllamaHandler(base_url=openai_url)
-        with st.spinner(f"正在检查或拉取模型 {model}，这可能需要一些时间..."):
-            try:
-                await ollama_handler.check_and_pull_model(model)
-                st.success(f"模型 {model} 已成功拉取或已存在")
-            except Exception as e:
-                st.error(f"模型拉取失败: {str(e)}")
+    if st.button("保存并生效"):
+        st.rerun()
+    return st.session_state[config_key]
+
+async def model_selection(key_prefix: str = "default", default_model: str = None):
+    """大模型选择组件
+    
+    参数:
+        key_prefix: 用于拼接st组件key的前缀，默认为"default"
+        default_model: 默认模型名称，如果未提供则使用MODEL_CONFIGS中的第一个模型
+    
+    返回:
+        model: 选择的模型名称
+        use_ollama: 是否使用ollama
+        openai_url: API基础地址
+        openai_key: API密钥
+    """
+    # 初始化session_state中的配置项，按key_prefix区分
+    config_key = f'llm_config_{key_prefix}'
+    if config_key not in st.session_state:
+        st.session_state[config_key] = {
+            'model': default_model or MODEL_CONFIGS[0]['model'],
+            'use_ollama': True,
+            'openai_url': "http://ollama:11434",
+            'openai_key': ""
+        }
+    # 显示当前配置
+    with st.container(border=True):
+        st.write(f"选择的模型名称：{st.session_state[config_key]['model']}")
+        st.write(f"是否使用ollama：{'是' if st.session_state[config_key]['use_ollama'] else '否'}")
+        st.write(f"API基础地址：{st.session_state[config_key]['openai_url']}")
+        st.write(f"API密钥：{'*' * len(st.session_state[config_key]['openai_key']) if st.session_state[config_key]['openai_key'] else '未设置'}")
+        if st.button("配置大模型参数"):
+            config_dialog(key_prefix, config_key)
+
+        if st.session_state[config_key]['use_ollama']:
+            model = st.session_state[config_key]['model']
+            ollama_handler = OllamaHandler(base_url=st.session_state[config_key]['openai_url'])
+            with st.spinner(f"正在检查或拉取模型 {model}，这可能需要一些时间..."):
+                try:
+                    await ollama_handler.check_and_pull_model(model)
+                    st.success(f"模型 {model} 已成功拉取或已存在")
+                except Exception as e:
+                    st.error(f"模型拉取失败: {str(e)}")
 
     # 初始化OpenAIHandler
     openai_handler = OpenAIHandler(
-        model=model,
-        openai_url=openai_url,
-        openai_key=openai_key
+        model=st.session_state[config_key]['model'],
+        openai_url=st.session_state[config_key]['openai_url'],
+        openai_key=st.session_state[config_key]['openai_key']
     )
     return openai_handler
 

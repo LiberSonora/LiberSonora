@@ -58,6 +58,58 @@ async def convert_to_wav(audio_bytes: bytes) -> bytes:
         raise Exception(f"音频转换发生错误: {str(e)}")
 
 
+async def convert_to_mp3(audio_bytes: bytes) -> bytes:
+    """将输入音频转换为 MP3 格式
+    
+    Args:
+        audio_bytes: 输入音频字节流
+        
+    Returns:
+        bytes: 转换后的 MP3 音频字节流
+        
+    Raises:
+        Exception: 当转换失败时抛出异常
+    """
+    try:
+        # 创建临时文件
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as temp_mp3:
+            with tempfile.NamedTemporaryFile(delete=False) as temp_input:
+                # 写入输入音频
+                temp_input.write(audio_bytes)
+                temp_input.flush()
+                
+                # 构建 ffmpeg 命令
+                ffmpeg_cmd = [
+                    'ffmpeg',
+                    '-y',  # 覆盖输出文件
+                    '-i', temp_input.name,  # 输入文件
+                    '-vn',  # 不处理视频
+                    '-acodec', 'libmp3lame',  # MP3 编码
+                    '-b:a', '192k',  # 比特率
+                    '-ar', '48000',  # 采样率
+                    '-ac', '1',  # 单声道
+                    temp_mp3.name  # 输出文件
+                ]
+                
+                # 执行转换
+                subprocess.run(ffmpeg_cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                
+                # 读取转换后的音频
+                temp_mp3.seek(0)
+                mp3_bytes = temp_mp3.read()
+                
+        # 删除临时文件
+        os.unlink(temp_input.name)
+        os.unlink(temp_mp3.name)
+        
+        return mp3_bytes
+    
+    except subprocess.CalledProcessError as e:
+        raise Exception(f"音频转换失败: {e.stderr.decode('utf-8')}")
+    except Exception as e:
+        raise Exception(f"音频转换发生错误: {str(e)}")
+
+
 async def _request_with_retry(url: str, data: dict, files: dict, retries: int = 3) -> dict:
     """
     带重试功能的请求函数

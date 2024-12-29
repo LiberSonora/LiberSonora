@@ -8,6 +8,7 @@ from packages.llm import QWEN2_5_MODEL, MINICPM3_MODEL
 
 async def render_text_correction():
     st.header("语音识别文本矫正")
+    st.warning("试过 pycorrect 和大模型矫正，效果挺一般还费时间，只作为实验特性推出")
     
     # 获取模型参数
     openai_handler = await model_selection(key_prefix="text_correction", default_model=QWEN2_5_MODEL)

@@ -30,5 +30,5 @@ else
 fi
 
 # 运行主程序
-streamlit run main.py
+python main.py
 
