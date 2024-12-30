@@ -148,7 +148,7 @@ async def process_single_audio(index, audio_file, config, temp_dir):
         logger.info(f"文件保存完成，耗时 {(datetime.now() - save_start).total_seconds():.2f} 秒")
         
         logger.info(f"第 {index + 1} 个音频处理完成，总耗时 {(datetime.now() - start_time).total_seconds():.2f} 秒")
-        return title, srt_content
+        return audio_path
         
     except Exception as e:
         import traceback

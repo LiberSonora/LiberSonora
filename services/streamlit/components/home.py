@@ -57,6 +57,8 @@ async def step_choose_audio_dir():
                     audio_files.append(file_path)
         
         if audio_files:
+            # 按文件名正序排序
+            audio_files.sort(key=lambda x: os.path.basename(x).lower())
             # 将文件路径存入session_state
             st.session_state.uploaded_file_paths = audio_files
             # 展示找到的文件列表
@@ -232,36 +234,30 @@ async def step_local_fileoutput():
                 with st.spinner("音频处理中，请稍候..."):
                     start_time = time.time()
                     
-                    # 创建任务列表
-                    tasks = []
+                    success_count = 0
+                    # 顺序处理每个文件
                     for index, file_path in enumerate(st.session_state.uploaded_file_paths):
-                        with open(file_path, 'rb') as f:
-                            file_obj = type('StreamlitUploadedFile', (), {
-                                'name': os.path.basename(file_path),
-                                'body': f.read()
-                            })()
-                            task = asyncio.create_task(
-                                process_single_audio(
+                        try:
+                            with open(file_path, 'rb') as f:
+                                file_obj = type('StreamlitUploadedFile', (), {
+                                    'name': os.path.basename(file_path),
+                                    'body': f.read()
+                                })()
+                                
+                                # 顺序处理单个音频文件
+                                audio_path = await process_single_audio(
                                     index=index,
                                     audio_file=file_obj,
                                     config=st.session_state.config,
                                     temp_dir=output_dir
                                 )
-                            )
-                            tasks.append(task)
-                    
-                    # 使用asyncio.gather并发执行所有任务
-                    results = await asyncio.gather(*tasks, return_exceptions=True)
-                    
-                    # 处理结果
-                    success_count = 0
-                    for file_path, result in zip(st.session_state.uploaded_file_paths, results):
-                        if isinstance(result, Exception):
-                            st.error(f"处理文件 {os.path.basename(file_path)} 时出错：{str(result)}")
-                        else:
-                            title, srt_content = result
-                            st.success(f"成功处理文件：{os.path.basename(file_path)} -> {title}")
-                            success_count += 1
+                                
+                                if audio_path:
+                                    st.success(f"成功处理文件：{os.path.basename(file_path)} -> {os.path.basename(audio_path)}")
+                                    success_count += 1
+                        except Exception as e:
+                            st.error(f"处理文件 {os.path.basename(file_path)} 时出错：{str(e)}")
+                            raise e
                     
                     end_time = time.time()
                     processing_time = end_time - start_time

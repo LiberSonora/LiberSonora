@@ -104,12 +104,9 @@ async def handle_audio(request):
         return json({"error": "配置文件格式错误"}, status=400)
     
     with tempfile.TemporaryDirectory() as temp_dir:
-        tasks = []
-        for index, audio_file in enumerate(request.files.getlist("files")):
-            tasks.append(process_single_audio(index, audio_file, config, temp_dir))
-        
         try:
-            await asyncio.gather(*tasks)
+            for index, audio_file in enumerate(request.files.getlist("files")):
+                await process_single_audio(index, audio_file, config, temp_dir)
         except Exception as e:
             return json({"error": f"处理音频时发生错误: {str(e)}"}, status=500)
         
