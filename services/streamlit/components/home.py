@@ -218,7 +218,7 @@ async def step_local_fileoutput():
     st.json(st.session_state.config)
     
     # 获取输出目录
-    output_dir = st.text_input("请输入输出目录路径", value="/mnt/data/output")
+    output_dir = st.text_input("请输入输出目录路径", value=os.path.join(os.path.dirname(st.session_state.uploaded_file_paths[0]), "output/"))
 
     st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}")
     display_audio_files(st.session_state.uploaded_file_paths)
@@ -253,7 +253,8 @@ async def step_local_fileoutput():
                                 )
                                 
                                 if audio_path:
-                                    st.success(f"成功处理文件：{os.path.basename(file_path)} -> {os.path.basename(audio_path)}")
+                                    # 避免依赖客户端渲染进而阻止离线处理
+                                    # st.success(f"成功处理文件：{os.path.basename(file_path)} -> {os.path.basename(audio_path)}")
                                     success_count += 1
                         except Exception as e:
                             st.error(f"处理文件 {os.path.basename(file_path)} 时出错：{str(e)}")
