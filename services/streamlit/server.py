@@ -98,7 +98,8 @@ async def process_single_audio(index, audio_file, config, temp_dir):
             title_generator = TitleGenerator(
                 openai_handler,
                 config["title"].get("book_title", ""),
-                config["title"].get("author", "")
+                config["title"].get("author", ""),
+                config["title"].get("lang", "")
             )
             title = await title_generator.generate_title("\n".join(text_lines))
             

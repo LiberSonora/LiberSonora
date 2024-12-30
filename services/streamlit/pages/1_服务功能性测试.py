@@ -2,7 +2,7 @@ import streamlit as st
 from io import BytesIO
 import time
 import asyncio
-from components.form import model_selection, get_text_correct_common_errors, select_translate_languages
+from components.form import model_selection, get_text_correct_common_errors, select_translate_languages, select_target_language
 from packages.openai import OpenAIHandler
 from packages.llm import QWEN2_5_MODEL, MINICPM3_MODEL
 
@@ -122,12 +122,15 @@ async def render_title_generation():
     with col2:
         author = st.text_input("作者（可选）", value="")
     
+    # 选择目标语言
+    lang = select_target_language()
+    
     if st.button("生成章节标题"):
         with st.spinner("正在生成章节标题..."):
             try:
                 # 调用标题生成功能
                 start_time = time.time()
-                title_generator = TitleGenerator(openai_handler, book_title, author)
+                title_generator = TitleGenerator(openai_handler, book_title, author, lang)
                 generated_title = await title_generator.generate_title(input_text)
                 end_time = time.time()
                 

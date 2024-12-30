@@ -8,7 +8,7 @@ from io import BytesIO
 import re
 import time
 import requests
-from components.form import model_selection, select_translate_languages, get_text_correct_common_errors
+from components.form import model_selection, select_translate_languages, get_text_correct_common_errors, select_target_language
 from packages.llm import QWEN2_5_MODEL, MINICPM3_MODEL
 
 async def step_upload_audio():
@@ -75,6 +75,9 @@ async def step_title_config():
     with col2:
         author = st.text_input("作者（可选）", value="")
     
+    # 新增选择目标语言
+    lang = select_target_language()
+    
     regex_origin = st.text_input("文件名正则表达式", value="(\\d+)",
                                 help="用于从原始文件名中提取数据")
     rule = st.text_input("文件名生成规则", value="{index}_{title}")
@@ -111,6 +114,7 @@ async def step_title_config():
         'generate': generate_title,
         'book_title': book_title,
         'author': author,
+        'lang': lang,
         'regex_origin': regex_origin,
         'rule': rule,
         'openai': openai_config.get_config() if openai_config != None else None

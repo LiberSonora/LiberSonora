@@ -117,8 +117,11 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
     )
     return openai_handler
 
-def get_text_correct_common_errors() -> List[dict]:
+def get_text_correct_common_errors(key_prefix: str = "default") -> List[dict]:
     """获取并编辑常见错误列表
+    
+    参数:
+        key_prefix: 用于拼接st组件key的前缀，默认为"default"
     
     返回:
         List[dict]: 包含常见错误映射的字典列表
@@ -136,15 +139,18 @@ def get_text_correct_common_errors() -> List[dict]:
     # 创建可编辑的错误表格
     df = pd.DataFrame(common_errors)
     st.write("请编辑或添加需要纠正的常见错误：")
-    edited_df = st.data_editor(df, num_rows="dynamic")
+    edited_df = st.data_editor(df, num_rows="dynamic", key=f"{key_prefix}_error_editor")
     
     # 将DataFrame转换为字典列表
     common_errors_list = edited_df.to_dict('records')
     
     return common_errors_list
 
-def select_translate_languages() -> tuple[str, str]:
+def select_translate_languages(key_prefix: str = "default") -> tuple[str, str]:
     """选择翻译的源语言和目标语言
+    
+    参数:
+        key_prefix: 用于拼接st组件key的前缀，默认为"default"
     
     返回:
         tuple[str, str]: (源语言代码, 目标语言代码)
@@ -160,7 +166,8 @@ def select_translate_languages() -> tuple[str, str]:
         from_lang = st.selectbox(
             "选择源语言",
             options=[lang["code"] for lang in from_languages],
-            format_func=lambda code: next((lang["name"] for lang in from_languages if lang["code"] == code), code)
+            format_func=lambda code: next((lang["name"] for lang in from_languages if lang["code"] == code), code),
+            key=f"{key_prefix}_from_lang"
         )
     
     with col2:
@@ -168,7 +175,31 @@ def select_translate_languages() -> tuple[str, str]:
         to_lang = st.selectbox(
             "选择目标语言", 
             options=[lang["code"] for lang in to_languages],
-            format_func=lambda code: next((lang["name"] for lang in to_languages if lang["code"] == code), code)
+            format_func=lambda code: next((lang["name"] for lang in to_languages if lang["code"] == code), code),
+            key=f"{key_prefix}_to_lang"
         )
     
     return from_lang, to_lang
+
+
+def select_target_language(key_prefix: str = "default") -> str:
+    """选择目标语言
+    
+    参数:
+        key_prefix: 用于拼接st组件key的前缀，默认为"default"
+    
+    返回:
+        str: 目标语言代码
+    """
+    # 导入目标语言列表
+    from packages.translate import from_languages
+    
+    # 选择目标语言
+    to_lang = st.selectbox(
+        "选择语言", 
+        options=[lang["code"] for lang in from_languages],
+        format_func=lambda code: next((lang["name"] for lang in from_languages if lang["code"] == code), code),
+        key=f"{key_prefix}_target_lang"
+    )
+    
+    return to_lang
