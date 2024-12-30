@@ -63,7 +63,7 @@ def config_dialog(key_prefix, config_key):
     
     st.session_state[config_key]['model'] = model
 
-    if st.button("保存并生效"):
+    if st.button("保存并生效", key=f"{key_prefix}_save_config_button"):
         st.rerun()
     return st.session_state[config_key]
 
@@ -95,7 +95,7 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
         st.write(f"是否使用ollama：{'是' if st.session_state[config_key]['use_ollama'] else '否'}")
         st.write(f"API基础地址：{st.session_state[config_key]['openai_url']}")
         st.write(f"API密钥：{'*' * len(st.session_state[config_key]['openai_key']) if st.session_state[config_key]['openai_key'] else '未设置'}")
-        if st.button("配置大模型参数"):
+        if st.button("配置大模型参数", key=f"{key_prefix}_config_button"):
             config_dialog(key_prefix, config_key)
 
         if st.session_state[config_key]['use_ollama']:
@@ -112,7 +112,8 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
     openai_handler = OpenAIHandler(
         model=st.session_state[config_key]['model'],
         openai_url=st.session_state[config_key]['openai_url'],
-        openai_key=st.session_state[config_key]['openai_key']
+        openai_key=st.session_state[config_key]['openai_key'],
+        use_ollama=st.session_state[config_key]['use_ollama']
     )
     return openai_handler
 

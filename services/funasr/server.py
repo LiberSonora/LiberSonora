@@ -45,6 +45,8 @@ async def speech_recognition(request):
     audio_file = request.files['file'][0]
     hotwords = request.args.get('hotwords', None)
     merge_thr = float(request.args.get('merge_thr', 0.5))
+    # 获取是否启用说话人识别参数，默认为False
+    spk_conf = request.args.get('spk_conf', 'False').lower() == 'true'
     
     try:
         from io import BytesIO
@@ -53,8 +55,8 @@ async def speech_recognition(request):
         # 将文件内容转换为BytesIO对象
         audio_data = BytesIO(audio_file.body)
         
-        # 调用语音识别函数
-        result = speech_to_text(audio_data, hotwords, merge_thr)
+        # 调用语音识别函数，传入spk_conf参数
+        result = speech_to_text(audio_data, hotwords, merge_thr, spk_conf)
         
         return json({
             "code": 0,

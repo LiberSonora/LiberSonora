@@ -16,12 +16,14 @@ to_languages = from_languages[1:] + [from_languages[0]]
 class OpenAITranslator:
     def __init__(self, openai_handler: OpenAIHandler):
         self.openai_handler = openai_handler
-        self.batch_size = 50
+        self.batch_size = 1 # 本地模型只能每条翻译，可能输出太长，注意力不够？
 
     def _validate_translation(self, original_text: List[str]):
         def validator(translated_text: str):
             translated_lines = translated_text.split('\n')
             if len(translated_lines) != len(original_text):
+                print("original_text", original_text)
+                print("translated_lines", translated_lines)
                 raise ValueError(f"翻译结果行数({len(translated_lines)})与原文行数({len(original_text)})不匹配")
         return validator
 
@@ -32,24 +34,23 @@ class OpenAITranslator:
             raise ValueError("texts 必须是字符串列表")
         
         sysprompt = (
-            f"You are a translation expert that creates translations for different speech levels, especially in {from_lang} and {to_lang}.\n\n"
-            f"Task: Provide an accurate {from_lang} to {to_lang} translation.\n"
-            f"Scope: Focus on maintaining the original meaning and context.\n"
-            f"Format: Provide the translation in a multi paragraph.\n"
-            f"Tone: Use a formal and professional tone.\n"
-            f"Key Information: Ensure all technical terms are accurately translated.\n"
-            f"Note: Please keep the same line break format as the original text and return the translation line by line.\n"
-            f"Important: Please do not add punctuation marks that are not in the original text.\n"
-            f"Important: Be sure not to add punctuation at the end of each line\n"
-            f"Note: Ensure that the {to_lang} translation does not contain any {from_lang} characters or words.\n\n"
-            f"Translate the following text from {from_lang} to {to_lang}:\n"
+            f"你是一位专业的翻译专家，擅长在不同语言之间进行翻译，特别是{from_lang}和{to_lang}之间的翻译。\n\n"
+            f"任务：提供准确的{from_lang}到{to_lang}的翻译。\n"
+            f"范围：专注于保持原文的含义和上下文。\n"
+            f"语气：使用正式和专业的语气。\n"
+            f"重要：请保持与原文相同的换行符，并逐行返回翻译结果。\n"
+            f"注意：确保{to_lang}的翻译结果中不包含任何{from_lang}的字符或单词。\n\n"
         )
 
         results = []
 
         # 分批处理
+        total_batches = (len(texts) + self.batch_size - 1) // self.batch_size
         for i in range(0, len(texts), self.batch_size):
+            batch_num = i // self.batch_size + 1
+            
             batch = texts[i:i + self.batch_size]
+            # print(f"正在处理第 {batch_num}/{total_batches} 批，本批次翻译 {len(batch)} 条文本，共 {len(texts)} 行文本")
             user_prompt = "\n".join(batch)
 
             messages = [
@@ -60,9 +61,10 @@ class OpenAITranslator:
             translated_text = await self.openai_handler.request(
                 messages=messages,
                 validator_callback=self._validate_translation(batch),
-                temp=0.4
+                temp=0.7
             )
 
             results.extend(translated_text.split('\n'))
+            # print(f"第 {batch_num} 批处理完成，已处理 {min(i + self.batch_size, len(texts))} 行")
 
         return results

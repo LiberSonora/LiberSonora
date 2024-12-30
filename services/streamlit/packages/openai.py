@@ -3,7 +3,7 @@ import json
 import aiohttp
 
 class OpenAIHandler:
-    def __init__(self, model: str, openai_url: str, openai_key: str, max_retries: int = 5, retry_delay: float = 1.0):
+    def __init__(self, model: str, openai_url: str, openai_key: str, max_retries: int = 5, use_ollama: bool = True, retry_delay: float = 1.0):
         """
         初始化 OpenAIHandler
         
@@ -17,6 +17,7 @@ class OpenAIHandler:
         self.model = model
         self.openai_url = openai_url
         self.openai_key = openai_key
+        self.use_ollama = use_ollama
         self.max_retries = max_retries
         self.retry_delay = retry_delay
     def get_config(self) -> dict:
@@ -29,7 +30,8 @@ class OpenAIHandler:
         return {
             "model": self.model,
             "openai_url": self.openai_url,
-            "openai_key": self.openai_key
+            "openai_key": self.openai_key,
+            "use_ollama": self.use_ollama,
         }
 
     async def request(self, messages: list, model: str = None, temp: float = 0.7, validator_callback=None) -> str:
@@ -81,10 +83,10 @@ class OpenAIHandler:
                         return content
 
                 except Exception as e:
+                    print(f"openai request 第 {attempt + 1} 次重试，错误信息: {str(e)}")
                     if attempt == self.max_retries - 1:  # 最后一次重试
                         raise Exception(f"请求OpenAI失败(重试{self.max_retries}次): {str(e)}")
                     await asyncio.sleep(retry_delay)
-                    retry_delay *= 2  # 指数退避
 
     async def request_json(self, messages: list, model: str = None, temp: float = 0.7, validator_callback=None) -> dict:
         """
@@ -142,7 +144,7 @@ class OpenAIHandler:
                             raise Exception(f"解析 OpenAI JSON 响应失败: {str(e)}: {json_response_str}")
 
                 except Exception as e:
+                    print(f"openai json request 第 {attempt + 1} 次重试，错误信息: {str(e)}")
                     if attempt == self.max_retries - 1:  # 最后一次重试
                         raise Exception(f"请求OpenAI JSON失败(重试{self.max_retries}次): {str(e)}")
                     await asyncio.sleep(retry_delay)
-                    retry_delay *= 2  # 指数退避

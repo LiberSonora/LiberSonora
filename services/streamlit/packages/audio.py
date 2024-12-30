@@ -6,6 +6,77 @@ import tempfile
 import subprocess
 import os
 
+def _ms_to_srt_time(ms: int) -> str:
+    """
+    将毫秒转换为SRT时间格式 (HH:MM:SS,mmm)
+    
+    Args:
+        ms: 毫秒数
+        
+    Returns:
+        str: SRT格式的时间字符串
+    """
+    hours = ms // 3600000
+    minutes = (ms % 3600000) // 60000
+    seconds = (ms % 60000) // 1000
+    milliseconds = ms % 1000
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
+
+def _ms_to_lrc_time(ms: int) -> str:
+    """
+    将毫秒转换为LRC时间格式 [MM:SS.xx]
+    
+    Args:
+        ms: 毫秒数
+        
+    Returns:
+        str: LRC格式的时间字符串
+    """
+    minutes = ms // 60000
+    seconds = (ms % 60000) // 1000
+    hundredths = (ms % 1000) // 10
+    return f"[{minutes:02d}:{seconds:02d}.{hundredths:02d}]"
+
+def generate_srt(subtitles: list) -> str:
+    """
+    根据字幕信息生成SRT格式文本
+    
+    Args:
+        subtitles: 字幕列表，每个元素包含 start, end, text
+        
+    Returns:
+        str: SRT格式的字符串
+    """
+    srt_content = ""
+    for i, sub in enumerate(subtitles):
+        start_time = _ms_to_srt_time(sub['start'])
+        end_time = _ms_to_srt_time(sub['end'])
+        # 处理多行文本
+        text = sub['text']
+        srt_content += f"{i+1}\n{start_time} --> {end_time}\n{text}\n\n"
+    return srt_content
+
+def generate_lrc(subtitles: list) -> str:
+    """
+    根据字幕信息生成LRC格式文本
+    
+    Args:
+        subtitles: 字幕列表，每个元素包含 start, end, text
+        
+    Returns:
+        str: LRC格式的字符串
+    """
+    lrc_content = ""
+    for sub in subtitles:
+        timestamp = _ms_to_lrc_time(sub['start'])
+        # 处理多行文本，每行都加上相同的时间戳
+        for line in reversed(sub['text'].split('\n')):
+            if line.strip():  # 忽略空行
+                lrc_content += f"{timestamp}{line}\n"
+    return lrc_content
+
+
+
 async def convert_to_wav(audio_bytes: bytes) -> bytes:
     """
     将输入音频转换为 WAV 格式
@@ -143,7 +214,7 @@ async def _request_with_retry(url: str, data: dict, files: dict, retries: int = 
                 raise Exception(f"请求失败，重试次数已达上限: {str(e)}")
             await asyncio.sleep(1 * (i + 1))  # 指数退避
 
-async def speech_to_text(audio_bytes: bytes, hotwords: Optional[str] = None) -> list:
+async def speech_to_text(audio_bytes: bytes, hotwords: Optional[str] = None, spk_conf: bool = False) -> list:
     """
     将语音文件转换为文字，返回带时间戳的文本列表
     
@@ -159,7 +230,9 @@ async def speech_to_text(audio_bytes: bytes, hotwords: Optional[str] = None) -> 
     """
     url = global_config.funasr_url + "/handle"
     
-    data = {}
+    data = {
+        "spk_conf": "True" if spk_conf  else "False"
+    }
     if hotwords:
         data['hotwords'] = hotwords
         
@@ -174,10 +247,90 @@ async def speech_to_text(audio_bytes: bytes, hotwords: Optional[str] = None) -> 
         if result.get('code') != 0:
             raise Exception(f"语音识别失败: {result.get('message')}")
             
-        # 提取并返回数据
-        return result.get('data', [])
+        # 提取并检查数据
+        data = result.get('data', [])
+        if not data:
+            raise Exception("语音识别结果为空")
+        return data
     except Exception as e:
         raise Exception(f"语音识别失败: {str(e)}")
+
+def remove_trailing_punctuation(text: str) -> str:
+    """去除字符串末尾的标点符号"""
+    punc = '。，、；：！？,.?!;:'
+    return text.rstrip(punc)
+def remove_trailing_punctuation_list(text_list: list) -> list:
+    """去除列表中每个字符串末尾的标点符号
+    
+    Args:
+        text_list: 字符串列表
+        
+    Returns:
+        list: 去除末尾标点后的字符串列表
+    """
+    return [remove_trailing_punctuation(text) for text in text_list]
+
+
+def format_speech_results(results: list, text_min_len: int = 5) -> list:
+    """
+    格式化语音识别结果，确保每句话长度不小于指定值
+    
+    Args:
+        results: 原始识别结果列表，每个元素包含 text, start, end, spk
+        text_min_len: 最小文本长度，默认5
+        
+    Returns:
+        list: 格式化后的结果列表
+        
+    Raises:
+        Exception: 当输入结果格式不正确时抛出异常
+    """
+    
+    if not results:
+        return []
+    
+    formatted_results = []
+    current_result = None
+    
+    for item in results:
+        # 检查输入格式
+        if not all(key in item for key in ['text', 'start', 'end', 'spk']):
+            raise Exception("Invalid result format")
+            
+        text = item['text']
+        
+        # 如果是第一句或者说话人不同，直接添加
+        if current_result is None or current_result['spk'] != item['spk']:
+            if current_result is not None:
+                # 去除当前结果的句末标点
+                current_result['text'] = remove_trailing_punctuation(current_result['text'])
+                formatted_results.append(current_result)
+            current_result = {
+                'text': text,
+                'start': item['start'],
+                'end': item['end'],
+                'spk': item['spk']
+            }
+        else:
+            # 合并文本和时间
+            current_result['text'] += f" {text}"
+            current_result['end'] = item['end']
+            
+        # 如果当前结果达到最小长度，添加到最终结果
+        if len(current_result['text']) >= text_min_len:
+            # 去除当前结果的句末标点
+            current_result['text'] = remove_trailing_punctuation(current_result['text'])
+            formatted_results.append(current_result)
+            current_result = None
+    
+    # 添加最后一个未处理的结果
+    if current_result is not None:
+        # 去除当前结果的句末标点
+        current_result['text'] = remove_trailing_punctuation(current_result['text'])
+        formatted_results.append(current_result)
+        
+    return formatted_results
+
 
 async def enhance_audio(audio_bytes: bytes, model_name: str) -> bytes:
     """
@@ -214,3 +367,4 @@ async def enhance_audio(audio_bytes: bytes, model_name: str) -> bytes:
                 return await response.read()
     except Exception as e:
         raise Exception(f"增强音频失败: {str(e)}")
+

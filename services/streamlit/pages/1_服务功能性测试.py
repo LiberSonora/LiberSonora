@@ -187,9 +187,11 @@ async def render_audio_to_subtitle():
                     audio_bytes = audio_file.getvalue()
                     
                     # 调用音频处理函数
-                    from packages.audio import convert_to_wav, speech_to_text
+                    from packages.audio import convert_to_wav, speech_to_text, format_speech_results
                     wav_audio = await convert_to_wav(audio_bytes)
                     subtitles = await speech_to_text(wav_audio, hotwords=hotwords)
+                    # st.json(subtitles)
+                    subtitles = format_speech_results(subtitles)
                     
                     end_time = time.time()
                     

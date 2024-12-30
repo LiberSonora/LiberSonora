@@ -51,7 +51,7 @@ async def step_translate_config():
 
 async def step_correct_config():
     st.subheader("文本纠错配置")
-    st.warning("这是实验性功能，可能会带来误判，请谨慎使用")
+    st.warning("这是实验性功能，可能会带来误修正、歌词错位等问题，请谨慎使用")
     enable_correct = st.checkbox("启用文本纠错", value=False)
     if enable_correct:
         openai_config = await model_selection(key_prefix="main_correct", default_model=QWEN2_5_MODEL)
@@ -78,7 +78,7 @@ async def step_title_config():
     regex_origin = st.text_input("文件名正则表达式", value="(\\d+)",
                                 help="用于从原始文件名中提取数据")
     rule = st.text_input("文件名生成规则", value="{index}_{title}")
-    with st.expander("文件名生成规则说明"):
+    with st.expander("文件名生成规则说明", expanded=True):
         st.write('''
             - origin: 原始文件名
             - index: 文件序号
@@ -95,7 +95,7 @@ async def step_title_config():
             base_name = os.path.splitext(file.name)[0]
             new_name = rule.format(
                 origin=base_name,
-                index=i+1,
+                index=str(i+1).zfill(3),
                 title="待生成",
                 book_title=book_title,
                 author=author,
@@ -130,27 +130,28 @@ async def step_preview_config():
             st.error("请先上传音频文件")
         else:
             try:
-                start_time = time.time()
-                files = [("files", file) for file in st.session_state.uploaded_files]
-                response = requests.post(
-                    "http://127.0.0.1:8000/handle",
-                    files=files,
-                    data={"config": json.dumps(st.session_state.config)}
-                )
-                
-                if response.status_code == 200:
-                    end_time = time.time()
-                    processing_time = end_time - start_time
-                    st.balloons()
-                    st.success(f"音频处理成功！耗时 {processing_time:.2f} 秒")
-                    st.download_button(
-                        label="下载处理结果",
-                        data=BytesIO(response.content),
-                        file_name="results.zip",
-                        mime="application/zip"
+                with st.spinner("音频处理中，请稍候..."):
+                    start_time = time.time()
+                    files = [("files", file) for file in st.session_state.uploaded_files]
+                    response = requests.post(
+                        "http://127.0.0.1:8000/handle",
+                        files=files,
+                        data={"config": json.dumps(st.session_state.config)}
                     )
-                else:
-                    st.error(f"处理失败：{response.json().get('error', '未知错误')}")
+                    
+                    if response.status_code == 200:
+                        end_time = time.time()
+                        processing_time = end_time - start_time
+                        st.balloons()
+                        st.success(f"音频处理成功！耗时 {processing_time:.2f} 秒")
+                        st.download_button(
+                            label="下载处理结果",
+                            data=BytesIO(response.content),
+                            file_name="results.zip",
+                            mime="application/zip"
+                        )
+                    else:
+                        st.error(f"处理失败：{response.json().get('error', '未知错误')}")
             except Exception as e:
                 st.error(f"请求失败：{str(e)}")
 

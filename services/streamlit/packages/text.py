@@ -88,15 +88,16 @@ class TitleGenerator:
 
     def _create_sysprompt(self) -> str:
         return (
-            f"You are a professional title generation expert responsible for creating concise section titles for the book '{self.book_name}' by {self.author}.\n\n"
-            f"Task: Generate a section title with 5-10 Chinese characters based on the provided text content.\n"
-            f"Requirements:\n"
-            f"1. The title must accurately summarize the text content\n"
-            f"2. The title length must strictly be between 5-10 Chinese characters\n"
-            f"3. The title must not contain any punctuation marks\n"
-            f"4. The title should be concise and highlight key points\n"
-            f"5. The title must not contain '章' or '节' etc.\n\n"
-            f"Examples of good titles:\n"
+            f"你是一位专业的标题生成专家，负责为书籍《{self.book_name}》（作者：{self.author}）总结出一个简洁准确的小节标题。\n\n"
+            f"任务：根据提供的文本内容生成一个5-25个汉字的章节标题。\n"
+            f"要求：\n"
+            f"1. 标题必须准确概括文本内容\n"
+            f"2. 标题长度必须严格控制在5-25个汉字之间\n"
+            f"3. 标题不能包含任何标点符号\n"
+            f"4. 标题应简洁明了，突出关键，有吸引力\n"
+            f"5. 标题不能包含'章'或'节'等字\n"
+            f"6. 标题内容可以是谁做了什么事情，也可以是讨论的观点\n\n"
+            f"优秀标题示例：\n"
             f"- 林黛玉葬花\n"
             f"- 孙悟空大闹天宫\n"
             f"- 诸葛亮草船借箭\n"
@@ -106,11 +107,21 @@ class TitleGenerator:
             f"- 刘备三顾茅庐\n"
             f"- 黛玉焚稿断痴情\n"
             f"- 宝玉挨打\n"
-            f"- 凤姐弄权铁槛寺\n\n"
-            f"Please generate an appropriate section title for the following content:\n"
+            f"- 凤姐弄权铁槛寺\n"
+            f"- 人工智能的伦理思考\n"
+            f"- 全球化与文化认同\n"
+            f"- 后疫情时代的经济复苏\n"
+            f"- 元宇宙的社会影响\n"
+            f"- 量子计算的未来展望\n"
+            f"- 可持续发展与环境保护\n"
+            f"- 数字时代的隐私保护\n"
+            f"- 区块链技术的应用前景\n"
+            f"- 教育改革与创新人才培养\n"
+            f"- 人工智能与就业市场变革\n\n"
+            f"请为以下内容生成一个合适的章节标题：\n"
         )
 
-    async def generate_title(self, content: str, max_length: int = 200) -> str:
+    async def generate_title(self, content: str, max_length: int = 500) -> str:
         if not isinstance(content, str):
             raise ValueError("content 必须是字符串")
         
@@ -125,7 +136,8 @@ class TitleGenerator:
         ]
 
         title = await self.openai_handler.request(
-            messages=messages
+            messages=messages,
+            temp=0.4
         )
 
         # 清理标题中的标点符号和多余空格，并确保适合作为文件名
