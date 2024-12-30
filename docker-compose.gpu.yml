@@ -6,6 +6,8 @@ services:
       - ./services/streamlit:/app
       - ./services/streamlit/envs/:/opt/conda/envs
       - ./services/streamlit/.conda-cache:/opt/conda/pkgs
+      # mount whatever you want to process
+      - /mnt/data:/mnt/data
     working_dir: /app
     # command: tail -f /dev/null
     command: bash start.sh
