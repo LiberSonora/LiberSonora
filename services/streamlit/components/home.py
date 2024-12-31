@@ -213,12 +213,34 @@ async def step_preview_config():
             except Exception as e:
                 st.error(f"请求失败：{str(e)}")
 
+def check_output_dir(directory):
+    """检查输出目录状态并提示用户"""
+    if os.path.exists(directory):
+        files = os.listdir(directory)
+        if files:
+            st.warning(f"警告：输出目录 '{directory}' 非空，包含 {len(files)} 个文件")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("删除目录内容", key="delete_dir_contents"):
+                    for file in files:
+                        os.remove(os.path.join(directory, file))
+                    st.success("目录内容已删除")
+                    st.rerun()
+            with col2:
+                if st.button("更换目录", key="change_output_dir"):
+                    st.session_state.output_dir = ""
+                    st.rerun()
+            return True
+    return False
 async def step_local_fileoutput():
     st.subheader("配置预览")
     st.json(st.session_state.config)
     
     # 获取输出目录
-    output_dir = st.text_input("请输入输出目录路径", value=os.path.join(os.path.dirname(st.session_state.uploaded_file_paths[0]), "output/"))
+    output_dir = st.text_input("请输入输出目录路径", 
+                             value=os.path.join(os.path.dirname(st.session_state.uploaded_file_paths[0]), "output/"))
+    if output_dir:
+        check_output_dir(output_dir)
 
     st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}")
     display_audio_files(st.session_state.uploaded_file_paths)
@@ -253,7 +275,6 @@ async def step_local_fileoutput():
                                 )
                                 
                                 if audio_path:
-                                    # 避免依赖客户端渲染进而阻止离线处理
                                     # st.success(f"成功处理文件：{os.path.basename(file_path)} -> {os.path.basename(audio_path)}")
                                     success_count += 1
                         except Exception as e:
