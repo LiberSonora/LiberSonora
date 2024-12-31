@@ -28,27 +28,6 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 - 持续更新，引入最新AI技术
 - 提供独特的音频处理与文本生成能力
 
-## 🖥️ 用户界面展示
-
-### 📚 批量处理有声书页面
-<div align="center">
-  <img src="assets/main-function.png" alt="批量处理功能界面" width="80%">
-  <p><i>强大的批量处理功能，轻松处理大量有声书</i></p>
-</div>
-
-### 🖥️ 服务器本地音频处理页面
-<div align="center">
-  <img src="assets/local-audio.png" alt="服务器本地音频处理界面" width="80%">
-  <p><i>高效处理服务器本地音频文件，省去文件传输步骤，提升处理效率</i></p>
-</div>
-
-### 🧪 独立服务测试页面
-<div align="center">
-  <img src="assets/single-test.png" alt="独立服务测试界面" width="80%">
-  <p><i>灵活的单一服务测试，快速验证各项功能</i></p>
-</div>
-
-
 # 🚀 LiberSonora 发展规划
 
 项目的愿景是打造一个全方位的有声书生态系统，分三个阶段逐步实现：
@@ -104,7 +83,7 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 > ![赞助二维码](./assets/rewardcode.png)
 
 
-### 功能列表
+## 功能列表
 
 - [x] 有声音频批量处理
 - [x] 移除背景音
@@ -165,6 +144,27 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 ![image](./assets/163-sub.png)
 ![image](./assets/163-sub-multilang.png)
+
+
+## 🖥️ 功能界面展示
+
+### 📚 批量处理有声书页面
+<div align="center">
+  <img src="assets/main-function.png" alt="批量处理功能界面" width="80%">
+  <p><i>强大的批量处理功能，轻松处理大量有声书</i></p>
+</div>
+
+### 🖥️ 服务器本地音频处理页面
+<div align="center">
+  <img src="assets/local-audio.png" alt="服务器本地音频处理界面" width="80%">
+  <p><i>高效处理服务器本地音频文件，省去文件传输步骤，提升处理效率</i></p>
+</div>
+
+### 🧪 独立服务测试页面
+<div align="center">
+  <img src="assets/single-test.png" alt="独立服务测试界面" width="80%">
+  <p><i>灵活的单一服务测试，快速验证各项功能</i></p>
+</div>
 
 
 ## 快速开始
