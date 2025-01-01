@@ -2,6 +2,10 @@ import os
 import json
 import time
 import argparse
+import sys
+import asyncio
+app_path = os.path.join(os.path.dirname(__file__), '../')
+sys.path.append(app_path)
 from packages.process import process_single_audio
 
 async def convert_audio_files(config_path: str, input_dir: str, output_dir: str):

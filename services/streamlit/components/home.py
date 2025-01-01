@@ -9,7 +9,7 @@ import re
 import time
 import requests
 from components.form import model_selection, select_translate_languages, get_text_correct_common_errors, select_target_language
-from packages.process import process_single_audio
+from packages.process import process_single_audio, process_audio_batch_backround
 from packages.llm import QWEN2_5_MODEL, MINICPM3_MODEL
 
 async def step_upload_audio():
@@ -48,6 +48,9 @@ async def step_choose_audio_dir():
                             help="请确保该目录存在且包含音频文件")
     
     if audio_dir and os.path.exists(audio_dir):
+        # 将选择的目录存入session_state
+        st.session_state.input_audio_dir = audio_dir
+        
         # 扫描目录中的音频文件
         audio_files = []
         for root, dirs, files in os.walk(audio_dir):
@@ -245,47 +248,78 @@ async def step_local_fileoutput():
     st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}")
     display_audio_files(st.session_state.uploaded_file_paths)
     
-    if st.button("开始处理音频"):
-        if 'uploaded_file_paths' not in st.session_state or not st.session_state.uploaded_file_paths:
-            st.error("请先选择音频文件")
-        else:
-            try:
-                # 创建输出目录（如果不存在）
-                os.makedirs(output_dir, exist_ok=True)
-                
-                with st.spinner("音频处理中，请稍候..."):
-                    start_time = time.time()
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("开始处理音频"):
+            if 'uploaded_file_paths' not in st.session_state or not st.session_state.uploaded_file_paths:
+                st.error("请先选择音频文件")
+            else:
+                try:
+                    # 创建输出目录（如果不存在）
+                    os.makedirs(output_dir, exist_ok=True)
                     
-                    success_count = 0
-                    # 顺序处理每个文件
-                    for index, file_path in enumerate(st.session_state.uploaded_file_paths):
-                        try:
-                            with open(file_path, 'rb') as f:
-                                file_obj = type('StreamlitUploadedFile', (), {
-                                    'name': os.path.basename(file_path),
-                                    'body': f.read()
-                                })()
-                                
-                                # 顺序处理单个音频文件
-                                audio_path = await process_single_audio(
-                                    index=index,
-                                    audio_file=file_obj,
-                                    config=st.session_state.config,
-                                    temp_dir=output_dir
-                                )
-                                
-                                if audio_path:
-                                    # st.success(f"成功处理文件：{os.path.basename(file_path)} -> {os.path.basename(audio_path)}")
-                                    success_count += 1
-                        except Exception as e:
-                            st.error(f"处理文件 {os.path.basename(file_path)} 时出错：{str(e)}")
-                            raise e
+                    with st.spinner("音频处理中，请稍候..."):
+                        start_time = time.time()
+                        
+                        success_count = 0
+                        # 顺序处理每个文件
+                        for index, file_path in enumerate(st.session_state.uploaded_file_paths):
+                            try:
+                                with open(file_path, 'rb') as f:
+                                    file_obj = type('StreamlitUploadedFile', (), {
+                                        'name': os.path.basename(file_path),
+                                        'body': f.read()
+                                    })()
+                                    
+                                    # 顺序处理单个音频文件
+                                    audio_path = await process_single_audio(
+                                        index=index,
+                                        audio_file=file_obj,
+                                        config=st.session_state.config,
+                                        temp_dir=output_dir
+                                    )
+                                    
+                                    if audio_path:
+                                        success_count += 1
+                            except Exception as e:
+                                st.error(f"处理文件 {os.path.basename(file_path)} 时出错：{str(e)}")
+                                raise e
+                        
+                        end_time = time.time()
+                        processing_time = end_time - start_time
+                        st.balloons()
+                        st.success(f"音频处理完成！成功处理 {success_count}/{len(st.session_state.uploaded_file_paths)} 个文件，总耗时 {processing_time:.2f} 秒")
+                        st.info(f"处理结果已保存到：{output_dir}")
+                        
+                except Exception as e:
+                    st.error(f"处理过程中发生错误：{str(e)}")
+
+    with col2:
+        if st.button("异步处理音频", help="在服务器后台异步处理音频文件，可以关闭页面。如需停止处理请停止容器。"):
+            if 'uploaded_file_paths' not in st.session_state or not st.session_state.uploaded_file_paths:
+                st.error("请先选择音频文件")
+            else:
+                try:
+                    # 创建输出目录（如果不存在）
+                    os.makedirs(output_dir, exist_ok=True)
                     
-                    end_time = time.time()
-                    processing_time = end_time - start_time
-                    st.balloons()
-                    st.success(f"音频处理完成！成功处理 {success_count}/{len(st.session_state.uploaded_file_paths)} 个文件，总耗时 {processing_time:.2f} 秒")
-                    st.info(f"处理结果已保存到：{output_dir}")
+                    # 启动异步处理
+                    await process_audio_batch_backround(
+                        input_dir=st.session_state.input_audio_dir,
+                        output_dir=output_dir,
+                        config=st.session_state.config
+                    )
                     
-            except Exception as e:
-                st.error(f"处理过程中发生错误：{str(e)}")
+                    st.success("已启动异步处理！")
+                    st.info(f"""
+                    请注意：
+                    1. 处理结果将保存到：{output_dir}
+                    2. 您可以关闭页面，处理会在后台继续进行
+                    3. 处理完成后，输出目录中的音频文件数量应该与输入文件数量一致
+                    4. 如需完全停止处理，请停止容器
+                    5. 执行时间请根据设备在同样配置下的单个音频处理时间相乘推断
+                    """)
+                    
+                except Exception as e:
+                    st.error(f"启动异步处理时发生错误：{str(e)}")

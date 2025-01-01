@@ -1,7 +1,7 @@
 from functools import partial
 import numpy as np
 import os
-import json as JSON
+import json
 import tempfile
 import logging
 import re
@@ -12,6 +12,7 @@ from packages.audio import convert_to_wav, enhance_audio, speech_to_text, format
 from packages.text import TextCorrector, TitleGenerator
 from packages.translate import OpenAITranslator
 from packages.openai import OpenAIHandler
+import uuid
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -154,4 +155,49 @@ async def process_single_audio(index, audio_file, config, temp_dir):
         import traceback
         logger.error(f"处理第 {index + 1} 个音频时发生错误: {str(e)}")
         logger.error(f"错误堆栈信息: {traceback.format_exc()}")
+        raise e
+
+async def process_audio_batch_backround(input_dir: str, output_dir: str, config: dict):
+    """异步批量处理音频文件
+    
+    参数:
+        input_dir: 输入目录路径
+        output_dir: 输出目录路径
+        config: 配置字典
+    """
+    try:
+        
+        # 生成唯一ID
+        config_id = str(uuid.uuid4())
+        
+        # 创建临时配置文件路径
+        config_path = f"/tmp/config_{config_id}.json"
+        
+        # 将配置写入临时文件
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config, f, ensure_ascii=False, indent=2)
+        
+        # 构造nohup命令
+        command = f"nohup python3 scripts/convert.py --config=\"{config_path}\" --input-dir=\"{input_dir}\" --output-dir=\"{output_dir}\" > /dev/null 2>&1 &"
+
+        logger.info(f"运行命令：{command}")
+        
+        # 执行命令
+        import subprocess
+        process = subprocess.Popen(command, shell=True)
+        
+        # 等待进程启动
+        await asyncio.sleep(1)
+        
+        # 检查进程是否在运行
+        if process.poll() is None:
+            logger.info(f"成功启动后台处理进程，PID: {process.pid}")
+            logger.info(f"配置文件已保存至: {config_path}")
+            return True
+        else:
+            logger.error("后台处理进程启动失败")
+            return False
+            
+    except Exception as e:
+        logger.error(f"启动后台处理进程时发生错误: {str(e)}")
         raise e
