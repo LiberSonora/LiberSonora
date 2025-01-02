@@ -5,6 +5,7 @@ import streamlit as st
 import streamlit_antd_components as sac
 import json
 from io import BytesIO
+import pandas as pd
 import re
 import time
 import requests
@@ -41,6 +42,45 @@ def display_audio_files(audio_files):
     # 显示表格
     st.dataframe(df, use_container_width=True)
 
+def choose_audio_files(audio_files):
+    """用DataFrame展示音频文件并支持多选
+    
+    参数:
+        audio_files: 音频文件路径列表
+        
+    返回:
+        checked_audio_files: 用户选择的文件路径列表
+    """
+    # 准备数据
+    data = []
+    for file_path in audio_files:
+        file_size = os.path.getsize(file_path) / 1024 / 1024  # 转换为MB
+        data.append({
+            '文件路径': file_path,
+            '文件大小(MB)': round(file_size, 2)
+        })
+    
+    # 创建DataFrame
+    df = pd.DataFrame(data)
+    
+    # 显示可多选的表格
+    event = st.dataframe(
+        df,
+        use_container_width=True,
+        on_select="rerun",
+        selection_mode=["multi-row"]
+    )
+    
+    # 获取用户选择的行
+    selected_rows = event.selection.rows if event.selection else []
+    
+    # 根据选择的行索引获取对应的文件路径
+    checked_audio_files = [audio_files[i] for i in selected_rows]
+    
+    return checked_audio_files
+
+
+
 async def step_choose_audio_dir():
     st.subheader("选择音频目录")
     # 输入服务器目录路径
@@ -65,7 +105,7 @@ async def step_choose_audio_dir():
             # 将文件路径存入session_state
             st.session_state.uploaded_file_paths = audio_files
             # 展示找到的文件列表
-            st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}")
+            st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}，在预览配置时可选择部分进行转换")
             display_audio_files(st.session_state.uploaded_file_paths)
         else:
             st.warning(f"在目录 {audio_dir} 中未找到任何音频文件")
@@ -247,7 +287,10 @@ async def step_local_fileoutput():
         st.session_state.output_audio_dir = output_dir
 
     st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}")
-    display_audio_files(st.session_state.uploaded_file_paths)
+    checked_audio_files = choose_audio_files(st.session_state.uploaded_file_paths)
+    if not checked_audio_files:  # 如果用户没有选择任何文件
+        checked_audio_files = st.session_state.uploaded_file_paths  # 自动选择所有文件
+        st.info("未选择特定文件，默认将处理所有音频文件")
     
     col1, col2 = st.columns(2)
     
@@ -265,7 +308,7 @@ async def step_local_fileoutput():
                         
                         success_count = 0
                         # 顺序处理每个文件
-                        for index, file_path in enumerate(st.session_state.uploaded_file_paths):
+                        for index, file_path in enumerate(checked_audio_files):
                             try:
                                 with open(file_path, 'rb') as f:
                                     file_obj = type('StreamlitUploadedFile', (), {
@@ -317,7 +360,8 @@ async def step_local_fileoutput():
                     await process_audio_batch_backround(
                         input_dir=st.session_state.input_audio_dir,
                         output_dir=output_dir,
-                        config=st.session_state.config
+                        config=st.session_state.config,
+                        audio_files=checked_audio_files
                     )
                     
                     st.success("已启动异步处理！")

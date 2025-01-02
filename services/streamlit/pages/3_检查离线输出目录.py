@@ -66,6 +66,23 @@ async def render_page():
                 st.success("输出目录文件数量与输入目录一致")
     elif output_dir:
         st.warning(f"在目录 {output_dir} 中未找到任何音频文件")
+    
+    # 检查并显示日志文件
+    log_file = os.path.join(output_dir, 'libersonora.log')
+    if os.path.exists(log_file):
+        with st.expander("查看处理日志", expanded=True):
+            with open(log_file, 'r', encoding='utf-8') as f:
+                log_content = f.read()
+                st.code(log_content, language='text')
+                
+            # 添加删除日志按钮
+            if st.button("删除处理日志", help="处理成功后会自动删除，如果已手工确认无误，可以删除日志文件"):
+                try:
+                    os.remove(log_file)
+                    st.success("日志文件已成功删除")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Failed to delete log file: {str(e)}")
 
     # 标题重新生成表单
     with st.expander("标题重新生成设置", expanded=True):
@@ -82,6 +99,8 @@ async def render_page():
     # 检查输出目录并显示结果
     if output_dir and os.path.exists(output_dir):
         results = check_offline_task_output(output_dir)
+        if not results:
+            return
         
         # 将结果转换为DataFrame，只保留需要的列
         df = pd.DataFrame(results)[['relative_path', 'has_srt', 'has_lrc']]
