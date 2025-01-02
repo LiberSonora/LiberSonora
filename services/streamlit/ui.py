@@ -1,89 +1,86 @@
-import os
-import sys
-import asyncio
 import streamlit as st
-import streamlit_antd_components as sac
-import json
-from io import BytesIO
-import re
-import time
-import requests
-from components.home import step_upload_audio,step_remove_background,step_subtitle_config,step_translate_config,step_correct_config,step_title_config, step_preview_config
 
-async def render_page():
-    st.title("有声书批量字幕识别及命名")
-
-    if 'current_step' not in st.session_state:
-        st.session_state.current_step = 0
-    if 'config' not in st.session_state:
-        st.session_state.config = {}
-    if 'uploaded_files' not in st.session_state:
-        st.session_state.uploaded_files = []
-
-    step_items = [
-        sac.StepsItem(title="上传音频", description="批量上传音频文件", disabled=True),
-        sac.StepsItem(title="背景音移除", description="选择是否移除背景音乐", disabled=True),
-        sac.StepsItem(title="字幕识别", description="配置字幕识别参数", disabled=True),
-        sac.StepsItem(title="多语字幕", description="配置多语言翻译", disabled=True),
-        sac.StepsItem(title="文本纠错", description="配置文本纠错功能", disabled=True),
-        sac.StepsItem(title="标题生成", description="配置标题生成规则", disabled=True),
-        sac.StepsItem(title="预览配置", description="确认配置并处理音频", disabled=True)
-    ]
-
-    current_step = sac.steps(
-        items=step_items,
-        index=st.session_state.current_step,
-        return_index=True,
-        format_func='title',
-        variant='default',
-        placement='horizontal',
-        direction='vertical'
-    )
-
-    step_functions = [
-        step_upload_audio,
-        step_remove_background,
-        step_subtitle_config,
-        step_translate_config,
-        step_correct_config,
-        step_title_config,
-        step_preview_config
-    ]
-
-    st.warning("""
-    请注意：
-    1. 步骤必须按顺序进行，不能跳跃
-    2. 每次重新进入某个步骤时，配置都会恢复默认值
-    3. 最终以任务执行前的预览配置为准
+def render_welcome_page():
+    st.title("LiberSonora")
+    
+    # 添加页面功能概览表格
+    st.markdown("""
+    ### 📂 页面功能概览
+    | 页面名称 | 功能描述 | 适用场景 |
+    |----------|----------|----------|
+    | 批量处理上传音频 | 支持上传少量音频文件进行测试 | 少量文件测试效果 |
+    | 离线处理服务器本地音频 | 支持批量处理服务器本地音频文件，包含子目录 | 大批量文件处理 |
+    | 服务功能性测试 | 单独测试某个功能模块的有效性 | 功能模块调试 |
     """)
 
-    await step_functions[current_step]()
+    st.info("""
+    💡 提示：
+    1. 使用“处理服务器本地音频”页面功能更适合文件批量处理
+    2. 直接在服务器本地处理可以省去文件上传下载、打包的资源消耗
+    3. 可以实现离线处理，等待生成完毕即可
+    """)
 
-    # 根据当前步骤决定显示哪些按钮
-    if current_step > 0 and current_step < len(step_items) - 1:
-        # 中间步骤显示上下步按钮
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("上一步"):
-                st.session_state.current_step -= 1
-                st.rerun()
-        with col2:
-            if st.button("下一步"):
-                st.session_state.current_step += 1
-                st.rerun()
-    elif current_step == 0:
-        # 第一步只显示下一步按钮
-        if st.button("下一步"):
-            st.session_state.current_step += 1
-            st.rerun()
-    else:
-        # 最后一步只显示上一步按钮
-        if st.button("上一步"):
-            st.session_state.current_step -= 1
-            st.rerun()
+    st.markdown("""
+    ### 🌟 项目亮点
 
-def main():
-    asyncio.run(render_page())
+    - 📚 **开源自由**：采用 MIT 许可证，真正的开源免费，音频处理与大模型推理全程本地离线运行
+    - 🚀 **便捷部署**：项目容器化，开发与部署便利，支持 API，轻松集成到个人工作流
+    - 🧩 **模块化设计**：各功能模块独立，可单独启动特定服务（如音频增强、字幕识别等）
+    - 🔧 **灵活定制**：支持自定义大模型，针对特定任务提升效果，配置灵活多样
+    - 💡 **创新功能**：持续更新，引入最新AI技术，提供独特的音频处理与文本生成能力
+    """)
 
-if __name__ == "__main__":
-    main()
+    st.markdown("""
+    ### 🎯 字幕识别支持
+    - ✅ 中文（zh-CN）
+    - ✅ 英语（en）
+    """)
+
+    st.markdown("""
+    ### 🌐 多语言字幕翻译支持
+    | 语言 | 支持状态 | 备注 |
+    |------|----------|------|
+    | 中文（zh-CN） | ✅ 支持 | 源语言，翻译目标语言 |
+    | 英语（en） | ✅ 支持 | 源语言，翻译目标语言 |
+    | 日语（ja） | ✅ 支持 | 翻译目标语言 |
+    | 法语（fr） | ✅ 支持 | 翻译目标语言 |
+    | 德语（de） | ✅ 支持 | 翻译目标语言 |
+    """)
+
+    st.markdown("""
+    ### 🎧 音乐软件字幕兼容性
+    | 软件名称 | 本地音乐 | 本地字幕支持 | 多语言字幕兼容 | 备注 |
+    |----------|----------|--------------|----------------|------|
+    | 网易云音乐 | 支持 | 支持 | 兼容 | |
+    | 小米音乐 | 支持 | 支持 | 兼容 | 单语言字幕正常，但多语言字幕进度条会偏快 |
+    | QQ音乐 | 支持 | 不支持 | 不兼容 | 只能云搜索歌词 |
+    | 酷狗音乐 | 支持 | 不支持 | 不兼容 | 只能云搜索歌词 |
+    | 酷我音乐 | 支持 | 不支持 | 不兼容 | 只能云歌词 |
+    | 汽水音乐 | 不支持 | 不支持 | 不兼容 | |
+    | 咪咕音乐 | 支持 | 不支持 | 不兼容 | |
+    | 喜马拉雅 | 不支持 | 不支持 | 不支持 | 不能导入 |
+    | MacOS Apple Music | 支持 | 不支持 | 不支持 | 不能导入 lrc/src 音频 |
+    """)
+
+    st.markdown("""
+    ### 💻 系统要求
+    | 组件 | 最低要求 | 备注 |
+    |------|----------|------|
+    | 显存 | 8GB 或更高 | 4GB NVIDIA GPU 也能运行但速度较慢 |
+    | 内存 | 16GB 或更高 | |
+    | 磁盘空间 | 50GB 以上 | |
+    """)
+
+    st.markdown("""
+    ### ⏱️ 性能测试
+    > 配置和环境：e3-1275v5 + 2080ti + 32GB DDR4，Ubuntu 22.04
+
+    | 处理项目 | 耗时 |
+    |----------|---------------------|
+    | 背景音移除 | 13.01s |
+    | 生成字幕 | 8.83s |
+    | 文本矫正 | 11.26s |
+    | 多语言翻译 | 11.03s |
+    | 标题生成 | 0.23s |
+    """)
+render_welcome_page()

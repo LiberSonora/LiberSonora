@@ -100,7 +100,8 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 ### 字幕转换和重命名结果示例下载
 
 > 有声书资源均来自互联网，仅供效果参考和学习，若有侵犯著作权利请联系我删除
-> 若想转换你正在听的有声书，但又不想搭建环境，可以转到 [📚有声书转换体验区](https://github.com/LiberSonora/LiberSonora/discussions/1) 留言
+
+> 若想转换你正在听的有声书，但又不想搭建环境，可以到 [📚有声书转换体验区](https://github.com/LiberSonora/LiberSonora/discussions/1) 留言
 
 | 书名 | 下载链接 |
 |------|----------|

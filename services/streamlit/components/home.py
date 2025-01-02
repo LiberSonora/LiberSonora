@@ -144,10 +144,10 @@ async def step_title_config():
     
     # 兼容 uploaded_files 和 uploaded_file_paths
     files = []
-    if 'uploaded_files' in st.session_state:
-        files = [(os.path.basename(file.name), file) for file in st.session_state.uploaded_files]
-    elif 'uploaded_file_paths' in st.session_state:
+    if 'uploaded_file_paths' in st.session_state:
         files = [(os.path.basename(path), path) for path in st.session_state.uploaded_file_paths]
+    elif 'uploaded_files' in st.session_state:
+        files = [(os.path.basename(file.name), file) for file in st.session_state.uploaded_files]
     
     if files:
         sample_data = []
@@ -272,12 +272,20 @@ async def step_local_fileoutput():
                                         'body': f.read()
                                     })()
                                     
+                                    # 获取文件相对于input_dir的相对路径
+                                    relative_path = os.path.relpath(file_path, st.session_state.input_audio_dir)
+                                    # 去掉文件名，只保留目录结构
+                                    relative_dir = os.path.dirname(relative_path)
+                                    # 在output_dir中创建对应的目录结构
+                                    output_subdir = os.path.join(output_dir, relative_dir)
+                                    os.makedirs(output_subdir, exist_ok=True)
+                                    
                                     # 顺序处理单个音频文件
                                     audio_path = await process_single_audio(
                                         index=index,
                                         audio_file=file_obj,
                                         config=st.session_state.config,
-                                        temp_dir=output_dir
+                                        temp_dir=output_subdir
                                     )
                                     
                                     if audio_path:

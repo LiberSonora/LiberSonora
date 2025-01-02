@@ -24,9 +24,12 @@ async def convert_audio_files(config_path: str, input_dir: str, output_dir: str)
         # 创建输出目录（如果不存在）
         os.makedirs(output_dir, exist_ok=True)
         
-        # 获取输入目录下的所有音频文件
-        audio_files = [os.path.join(input_dir, f) for f in os.listdir(input_dir) 
-                      if f.endswith(('.mp3', '.wav', '.pcm'))]
+        # 获取输入目录下的所有音频文件（包括子目录）
+        audio_files = []
+        for root, _, files in os.walk(input_dir):
+            for file in files:
+                if file.endswith(('.mp3', '.wav', '.pcm')):
+                    audio_files.append(os.path.join(root, file))
         
         if not audio_files:
             print("Error: No audio files found in input directory")
@@ -47,12 +50,18 @@ async def convert_audio_files(config_path: str, input_dir: str, output_dir: str)
                         'body': f.read()
                     })()
                     
+                    # 计算相对路径
+                    relative_path = os.path.relpath(os.path.dirname(file_path), input_dir)
+                    # 创建对应的输出目录
+                    target_dir = os.path.join(output_dir, relative_path)
+                    os.makedirs(target_dir, exist_ok=True)
+                    
                     # 处理单个音频文件
                     audio_path = await process_single_audio(
                         index=index,
                         audio_file=file_obj,
                         config=config,
-                        temp_dir=output_dir
+                        temp_dir=target_dir
                     )
                     
                     if audio_path:
