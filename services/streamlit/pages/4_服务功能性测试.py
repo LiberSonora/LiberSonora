@@ -191,8 +191,8 @@ async def render_audio_to_subtitle():
                     
                     # 调用音频处理函数
                     from packages.audio import convert_to_wav, speech_to_text, format_speech_results
-                    wav_audio = await convert_to_wav(audio_bytes)
-                    subtitles = await speech_to_text(wav_audio, hotwords=hotwords)
+                    # wav_audio = await convert_to_wav(audio_bytes)
+                    subtitles = await speech_to_text(audio_bytes, hotwords=hotwords)
                     # st.json(subtitles)
                     subtitles = format_speech_results(subtitles)
                     

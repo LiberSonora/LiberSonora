@@ -23,7 +23,7 @@ Sanic.START_METHOD_SET = True
 WorkerManager.THRESHOLD = 400
 app = Sanic("LiberSonora", dumps=partial(JSON.dumps, cls=CustomJSONEncoder))
 app.config.REQUEST_TIMEOUT = 1000
-app.config.REQUEST_MAX_SIZE = 1000000000
+app.config.REQUEST_MAX_SIZE = 1000_000_000
 
 @app.get("/")
 async def welcome(_):
