@@ -292,6 +292,8 @@ async def step_local_fileoutput():
     if not checked_audio_files:  # 如果用户没有选择任何文件
         checked_audio_files = st.session_state.uploaded_file_paths  # 自动选择所有文件
         st.info("未选择特定文件，默认将处理所有音频文件")
+    else:
+        display_audio_files(checked_audio_files)
     
     col1, col2 = st.columns(2)
     
