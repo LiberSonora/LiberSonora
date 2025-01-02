@@ -93,6 +93,7 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 - [x] 自动标点移除
 - [x] 支持灵活的批量重命名
 - [x] API 支持
+- [x] 超过 3h 的音频转换支持
 - [ ] 提供云服务
 - [ ] 国际化接轨，实现英文界面和英文 README
 - [ ] CPU 可运行（低优先级，可能不做，由于 clear-voice 和 funasr 项目依赖原因，这个项目现在只能用带 nvidia GPU 的环境运行）
@@ -107,6 +108,7 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 |------|----------|--------|------|
 | 《资本论.马克思》 | https://pan.quark.cn/s/7d2e048b0747 | uhjP | 经典政治经济学著作，中文 |
 | 《苦难辉煌.金一南》 | https://pan.quark.cn/s/b37fd2be9d50 | Mhud | 现代历史题材作品，中文 |
+| 《毛泽东选集》 | https://pan.quark.cn/s/db5d332ca110 | 1Vvr | 中文 |
 | 《Alice's Adventures in Wonderland.Lewis Carroll》 | https://pan.quark.cn/s/2699b5b63abc | FNx8 | 爱丽丝梦游仙境，源语言英语+标题英语+字幕自动翻译中文 |
 | 《Romeo and Juliet.William Shakespeare》 | https://pan.quark.cn/s/27cb7de6f7ce | pjJ9 | 罗密欧与朱丽叶，源语言英语+标题英语+字幕自动翻译中文 |
 
