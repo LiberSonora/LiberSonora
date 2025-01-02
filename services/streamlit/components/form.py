@@ -182,11 +182,12 @@ def select_translate_languages(key_prefix: str = "default") -> tuple[str, str]:
     return from_lang, to_lang
 
 
-def select_target_language(key_prefix: str = "default") -> str:
+def select_target_language(key_prefix: str = "default", label: str = "选择语言") -> str:
     """选择目标语言
     
     参数:
         key_prefix: 用于拼接st组件key的前缀，默认为"default"
+        label: 选择框的标签文本，默认为"选择语言"
     
     返回:
         str: 目标语言代码
@@ -196,7 +197,7 @@ def select_target_language(key_prefix: str = "default") -> str:
     
     # 选择目标语言
     to_lang = st.selectbox(
-        "选择语言", 
+        label, 
         options=[lang["code"] for lang in from_languages],
         format_func=lambda code: next((lang["name"] for lang in from_languages if lang["code"] == code), code),
         key=f"{key_prefix}_target_lang"

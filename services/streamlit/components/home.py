@@ -157,16 +157,17 @@ async def step_title_config():
     st.subheader("文件名配置")
     generate_title = st.checkbox("自动总结标题", value=True, help="如果开启，则会利用大模型从识别的文本中进行总结")
     openai_config = None
+    lang="zh-CN"
     if generate_title:
         openai_config = await model_selection(key_prefix="main_title", default_model=QWEN2_5_MODEL)
+        # 新增选择目标语言
+        lang = select_target_language(label="标题生成语言")
     col1, col2 = st.columns(2)
     with col1:
         book_title = st.text_input("书名（可选）", value="")
     with col2:
         author = st.text_input("作者（可选）", value="")
     
-    # 新增选择目标语言
-    lang = select_target_language()
     
     regex_origin = st.text_input("文件名正则表达式", value="(\\d+)",
                                 help="用于从原始文件名中提取数据")
@@ -196,7 +197,7 @@ async def step_title_config():
             new_name = rule.format(
                 origin=base_name,
                 index=str(i+1).zfill(3),
-                title="待生成",
+                title="AI生成" if generate_title else "空字符",
                 book_title=book_title,
                 author=author,
                 *re.search(regex_origin, base_name).groups() if re.search(regex_origin, base_name) else []

@@ -74,6 +74,10 @@ async def render_page():
             with open(log_file, 'r', encoding='utf-8') as f:
                 log_content = f.read()
                 st.code(log_content, language='text')
+            
+            # 添加刷新日志按钮
+            if st.button("刷新日志", help="点击重新加载日志文件内容"):
+                st.rerun()
                 
             # 添加删除日志按钮
             if st.button("删除处理日志", help="处理成功后会自动删除，如果已手工确认无误，可以删除日志文件"):
@@ -94,7 +98,7 @@ async def render_page():
             author = st.text_input("作者（可选）", value="")
         
         # 新增选择目标语言
-        lang = select_target_language()
+        lang = select_target_language(label="标题生成语言")
 
     # 检查输出目录并显示结果
     if output_dir and os.path.exists(output_dir):
