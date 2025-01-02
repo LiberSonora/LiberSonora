@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import asyncio
+import shutil
 from components.form import model_selection, select_target_language
 from packages.process import check_offline_task_output, get_audio_files, ai_rename_files
 from components.home import display_audio_files
@@ -21,6 +22,26 @@ async def render_page():
         st.warning(f"在目录 {input_dir} 中未找到任何音频文件")
 
     output_dir = st.text_input("输出目录", value=st.session_state.get("output_audio_dir", ""))
+    
+    # 打包下载输出目录功能
+    if output_dir and os.path.exists(output_dir):
+        # 显示下载按钮
+        if st.button("打包下载输出目录", help="点击下载输出目录中的所有文件"):
+            # 使用tempfile创建临时zip文件
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp_file:
+                zip_path = tmp_file.name
+                shutil.make_archive(zip_path[:-4], "zip", output_dir)
+                
+                # 触发下载
+                with open(zip_path, "rb") as f:
+                    st.download_button(
+                        label="开始下载",
+                        data=f,
+                        file_name="output.zip",
+                        mime="application/zip",
+                        help="点击下载输出目录中的所有文件"
+                    )
 
     # 显示输出目录音频文件并检查数量
     output_audio_files = get_audio_files(output_dir)

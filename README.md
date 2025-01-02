@@ -103,11 +103,11 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 > 若想转换你正在听的有声书，但又不想搭建环境，可以到 [📚有声书转换体验区](https://github.com/LiberSonora/LiberSonora/discussions/1) 留言
 
-| 书名 | 下载链接 | 提取码 |
-|------|----------|--------|
-| 《资本论.马克思》 | https://pan.quark.cn/s/7d2e048b0747 | uhjP |
-| 《苦难辉煌.金一南》 | https://pan.quark.cn/s/b37fd2be9d50 | Mhud |
-| 《毛泽东选集》 | 链接待补充 | 待补充 |
+| 书名 | 下载链接 | 提取码 | 备注 |
+|------|----------|--------|------|
+| 《资本论.马克思》 | https://pan.quark.cn/s/7d2e048b0747 | uhjP | 经典政治经济学著作，中文 |
+| 《苦难辉煌.金一南》 | https://pan.quark.cn/s/b37fd2be9d50 | Mhud | 现代历史题材作品，中文 |
+| 《Alice's Adventures in Wonderland.Lewis Carroll》 | https://pan.quark.cn/s/2699b5b63abc | FNx8 | 爱丽丝梦游仙境，源语言英语+标题英语+字幕自动翻译中文 |
 
 ## 字幕识别和大模型翻译支持
 
