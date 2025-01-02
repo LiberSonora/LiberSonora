@@ -161,6 +161,13 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
   <p><i>高效处理服务器本地音频文件，省去文件传输步骤，提升处理效率</i></p>
 </div>
 
+### 🔍 手动检查输出结果页面
+<div align="center">
+  <img src="assets/manual-check.png" alt="手动检查输出结果界面" width="80%">
+  <p><i>便捷的手动检查功能，可手动命名也可让 AI 重新生成</i></p>
+</div>
+
+
 ### 🧪 独立服务测试页面
 <div align="center">
   <img src="assets/single-test.png" alt="独立服务测试界面" width="80%">
