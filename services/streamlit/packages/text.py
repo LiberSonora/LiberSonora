@@ -160,10 +160,11 @@ class TitleGenerator:
             temp=0.4
         )
 
-        # 清理标题中的标点符号和多余空格，并确保适合作为文件名
-        invalid_chars = ['。', '，', '！', '？', '/', '\\', ':', '*', '?', '"', '<', '>', '|']
+        # 清理标题中的标点符号、特殊字符、多余空格和换行符，并确保适合作为文件名
+        invalid_chars = ['。', '，', '！', '？', '/', '\\', ':', '*', '?', '"', '<', '>', '|', '$', "'", '“', '”', '\n', '\r']
         for char in invalid_chars:
             title = title.replace(char, '')
+        title = title.replace('\n', '-').replace('\r', '-')  # 将换行符替换为 -
         title = title.strip()
         
         if len(title) > 100:

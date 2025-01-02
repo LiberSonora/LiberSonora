@@ -241,9 +241,10 @@ async def step_local_fileoutput():
     
     # 获取输出目录
     output_dir = st.text_input("请输入输出目录路径", 
-                             value=os.path.join(os.path.dirname(st.session_state.uploaded_file_paths[0]), "output/"))
+                             value=os.path.dirname(st.session_state.uploaded_file_paths[0]) + "-output/")
     if output_dir:
         check_output_dir(output_dir)
+        st.session_state.output_audio_dir = output_dir
 
     st.info(f"找到的音频文件：{len(st.session_state.uploaded_file_paths)}")
     display_audio_files(st.session_state.uploaded_file_paths)

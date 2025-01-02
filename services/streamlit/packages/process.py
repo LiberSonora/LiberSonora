@@ -201,3 +201,119 @@ async def process_audio_batch_backround(input_dir: str, output_dir: str, config:
     except Exception as e:
         logger.error(f"启动后台处理进程时发生错误: {str(e)}")
         raise e
+
+def check_offline_task_output(output_dir: str) -> list:
+    """检查离线输出目录中的音频文件及其字幕文件
+    
+    参数:
+        output_dir: 输出目录路径
+        
+    返回:
+        包含音频文件信息的列表，每个元素为字典，包含：
+        - audio_path: 音频文件绝对路径
+        - srt_path: srt字幕文件绝对路径
+        - lrc_path: lrc字幕文件绝对路径  
+        - relative_path: 音频文件相对路径
+        - has_srt: srt文件是否存在
+        - has_lrc: lrc文件是否存在
+    """
+    import os
+    from glob import glob
+    
+    # 支持的音频文件扩展名
+    audio_extensions = ['mp3', 'wav', 'pem']
+    
+    # 查找所有音频文件
+    audio_files = []
+    for ext in audio_extensions:
+        audio_files.extend(glob(os.path.join(output_dir, '**', f'*.{ext}'), recursive=True))
+    
+    result = []
+    for audio_path in audio_files:
+        # 获取相对路径
+        relative_path = os.path.relpath(audio_path, output_dir)
+        
+        # 获取文件名（不含扩展名）
+        base_name = os.path.splitext(audio_path)[0]
+        
+        # 检查字幕文件
+        srt_path = f"{base_name}.srt"
+        lrc_path = f"{base_name}.lrc"
+        
+        result.append({
+            'audio_path': audio_path,
+            'srt_path': srt_path,
+            'lrc_path': lrc_path,
+            'relative_path': relative_path,
+            'has_srt': os.path.exists(srt_path),
+            'has_lrc': os.path.exists(lrc_path)
+        })
+    
+    # 按照relative_path进行排序
+    result.sort(key=lambda x: x['relative_path'])
+    
+    return result
+
+async def ai_rename_files(openai_config, book_title, author, lang, audio_path, lrc_path, srt_path):
+    """使用AI对已生成的文件进行重命名
+    
+    参数:
+        openai_config: OpenAI配置
+        book_title: 书名
+        author: 作者
+        lang: 语言
+        audio_path: 音频文件路径
+        lrc_path: lrc字幕文件路径
+        srt_path: srt字幕文件路径
+        
+    返回:
+        新生成的标题
+    """
+    try:
+        # 读取lrc文件内容并移除字幕格式
+        if os.path.exists(lrc_path):
+            with open(lrc_path, 'r', encoding='utf-8') as f:
+                lrc_content = f.read()
+                # 移除时间戳，保留文本内容
+                text_lines = [line.split(']')[-1].strip() for line in lrc_content.split('\n') if line.strip()]
+        else:
+            raise FileNotFoundError("LRC file not found")
+
+        # print("text_lines", text_lines)
+
+        # 初始化OpenAI处理器
+        openai_handler = OpenAIHandler(
+            model=openai_config["model"],
+            use_ollama=openai_config["use_ollama"],
+            openai_url=openai_config["openai_url"],
+            openai_key=openai_config["openai_key"]
+        )
+
+        # 创建标题生成器并生成标题
+        title_generator = TitleGenerator(
+            openai_handler,
+            book_title,
+            author,
+            lang
+        )
+        title = await title_generator.generate_title("\n".join(text_lines))
+        
+        return title
+
+    except Exception as e:
+        raise Exception(f"AI rename failed: {str(e)}")
+
+
+
+def get_audio_files(directory):
+    """获取目录中的所有音频文件"""
+    audio_files = []
+    if directory and os.path.exists(directory):
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                if file.lower().endswith(('.mp3', '.wav', '.pcm')):
+                    file_path = os.path.join(root, file)
+                    audio_files.append(file_path)
+        # 按文件名正序排序
+        audio_files.sort(key=lambda x: os.path.basename(x).lower())
+    return audio_files
