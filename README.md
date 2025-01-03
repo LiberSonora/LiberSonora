@@ -1,6 +1,6 @@
 # LiberSonora
 
-> todo:: 放一个 logo，纯色底，音频和书籍相关
+![LiberSonora Logo](./assets/logo.jpg)
 
 LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的、开源的有声书工具集，全程离线，支持 GPU 加速、批量处理及自定义大模型
 
