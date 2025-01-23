@@ -1,22 +1,35 @@
 import streamlit as st
 from typing import List
 import pandas as pd
-from packages.llm import MODEL_CONFIGS
+from packages.llm import getModelConfig, getProvider, PROVIDER_CONFIG, PROVIDER_OLLAMA, PROVIDER_DEEPSEEK
 from packages.ollama import OllamaHandler
 from packages.openai import OpenAIHandler
 import asyncio
 
 @st.dialog("配置大模型参数")
 def config_dialog(key_prefix, config_key):
-    # 使用ollama勾选框
-    use_ollama = st.checkbox(
-        "使用Ollama", 
-        value=st.session_state[config_key]['use_ollama'], 
-        help="勾选此选项将尝试自动通过 ollama API 拉取所需的大模型",
-        key=f'{key_prefix}_use_ollama'
+    # 供应商选择
+    provider_options = [(config['provider'], config) for config in PROVIDER_CONFIG]
+    selected_provider_name = st.radio(
+        "请选择模型供应商",
+        options=[option[0] for option in provider_options],
+        index=next((i for i, option in enumerate(provider_options) if option[1]['provider'] == st.session_state[config_key]['provider']), 0),
+        key=f'{key_prefix}_provider_radio',
+        captions=[option[1]['comment'] for option in provider_options]  # 添加供应商描述作为caption
     )
-    st.session_state[config_key]['use_ollama'] = use_ollama
-
+    
+    # 立即更新供应商配置
+    selected_provider = getProvider(selected_provider_name)
+    model_configs = getModelConfig(selected_provider_name)
+    
+    # 更新session_state中的配置
+    st.session_state[config_key].update({
+        'provider': selected_provider_name,
+        'use_ollama': selected_provider['provider'] == PROVIDER_OLLAMA,
+        'openai_url': selected_provider['endpoint'],
+        'model': model_configs[0]['model']
+    })
+    
     # API地址输入
     openai_url = st.text_input(
         "API地址", 
@@ -42,6 +55,9 @@ def config_dialog(key_prefix, config_key):
         help="可替换为更大的 ollama 模型或 deepseek 等提升质量，连接外部模型时需要先修改 API 地址"
     )
     
+    # 获取当前供应商的模型配置
+    model_configs = getModelConfig(selected_provider_name)
+    
     if custom_model:
         # 自定义模型输入框
         model = st.text_input(
@@ -49,30 +65,30 @@ def config_dialog(key_prefix, config_key):
             value=st.session_state[config_key]['model'],
             key=f'{key_prefix}_custom_model_input'
         )
+        st.session_state[config_key]['model'] = model
     else:
         # 模型选择单选，显示name，返回model
-        model_options = [(config['name'], config["model"], config['comment']) for config in MODEL_CONFIGS]
+        model_options = [(config['name'], config["model"], config['comment']) for config in model_configs]
         selected = st.radio(
             "请选择模型",
             options=[option[0] for option in model_options],
-            index=next(i for i, option in enumerate(model_options) if option[1] == st.session_state[config_key]['model']),
+            index=next((i for i, option in enumerate(model_options) if option[1] == st.session_state[config_key]['model']), 0),
             key=f'{key_prefix}_model_radio',
             captions=[option[2] for option in model_options]
         )
         model = next(option[1] for option in model_options if option[0] == selected)
+        # 立即更新模型配置
+        st.session_state[config_key]['model'] = model
     
-    st.session_state[config_key]['model'] = model
-
     if st.button("保存并生效", key=f"{key_prefix}_save_config_button"):
         st.rerun()
     return st.session_state[config_key]
 
-async def model_selection(key_prefix: str = "default", default_model: str = None):
+async def model_selection(key_prefix: str = "default"):
     """大模型选择组件
     
     参数:
         key_prefix: 用于拼接st组件key的前缀，默认为"default"
-        default_model: 默认模型名称，如果未提供则使用MODEL_CONFIGS中的第一个模型
     
     返回:
         model: 选择的模型名称
@@ -82,12 +98,17 @@ async def model_selection(key_prefix: str = "default", default_model: str = None
     """
     # 初始化session_state中的配置项，按key_prefix区分
     config_key = f'llm_config_{key_prefix}'
+    default_provider_name = PROVIDER_OLLAMA
+    default_provider = getProvider(default_provider_name)
+    default_provider_config = getModelConfig(default_provider_name)
+
     if config_key not in st.session_state:
         st.session_state[config_key] = {
-            'model': default_model or MODEL_CONFIGS[0]['model'],
+            'model': default_provider_config[0]['model'],
             'use_ollama': True,
-            'openai_url': "http://ollama:11434",
-            'openai_key': ""
+            'openai_url': default_provider["endpoint"],
+            'openai_key': "",
+            "provider": default_provider_name
         }
     # 显示当前配置
     with st.container(border=True):

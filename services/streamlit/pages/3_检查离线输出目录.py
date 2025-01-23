@@ -90,7 +90,7 @@ async def render_page():
 
     # 标题重新生成表单
     with st.expander("标题重新生成设置", expanded=True):
-        openai_config = await model_selection(key_prefix="regenerate_title", default_model=QWEN2_5_MODEL)
+        openai_config = await model_selection(key_prefix="regenerate_title")
         col1, col2 = st.columns(2)
         with col1:
             book_title = st.text_input("书名（可选）", value="")

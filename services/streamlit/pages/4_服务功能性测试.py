@@ -11,7 +11,7 @@ async def render_text_correction():
     st.warning("试过 pycorrect 和大模型矫正，效果挺一般还费时间，只作为实验特性推出")
     
     # 获取模型参数
-    openai_handler = await model_selection(key_prefix="text_correction", default_model=QWEN2_5_MODEL)
+    openai_handler = await model_selection(key_prefix="text_correction")
 
     # 初始化TextCorrector
     from packages.text import TextCorrector
@@ -55,7 +55,7 @@ async def render_translation():
     st.header("多语言翻译")
     
     # 获取模型参数
-    openai_handler = await model_selection(key_prefix="translate", default_model=QWEN2_5_MODEL)
+    openai_handler = await model_selection(key_prefix="translate")
 
     # 初始化OpenAITranslator
     from packages.translate import OpenAITranslator
@@ -97,7 +97,7 @@ async def render_title_generation():
     st.header("识别小节取名")
     
     # 获取模型参数
-    openai_handler = await model_selection(key_prefix="title", default_model=QWEN2_5_MODEL)
+    openai_handler = await model_selection(key_prefix="title")
 
     # 初始化TitleGenerator
     from packages.text import TitleGenerator

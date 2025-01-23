@@ -130,7 +130,7 @@ async def step_translate_config():
     enable_translate = st.checkbox("启用多语言字幕翻译", value=False)
     if enable_translate:
         from_lang, to_lang = select_translate_languages()
-        openai_config = await model_selection(key_prefix="main_translate", default_model=QWEN2_5_MODEL)
+        openai_config = await model_selection(key_prefix="main_translate")
         st.session_state.config['translate'] = {
             'from': from_lang,
             'to': to_lang,
@@ -144,7 +144,7 @@ async def step_correct_config():
     st.warning("这是实验性功能，可能会带来误修正、歌词错位等问题，请谨慎使用")
     enable_correct = st.checkbox("启用文本纠错", value=False)
     if enable_correct:
-        openai_config = await model_selection(key_prefix="main_correct", default_model=QWEN2_5_MODEL)
+        openai_config = await model_selection(key_prefix="main_correct")
         common_errors = get_text_correct_common_errors()
         st.session_state.config['correct'] = {
             'openai': openai_config.get_config(),
@@ -159,7 +159,7 @@ async def step_title_config():
     openai_config = None
     lang="zh-CN"
     if generate_title:
-        openai_config = await model_selection(key_prefix="main_title", default_model=QWEN2_5_MODEL)
+        openai_config = await model_selection(key_prefix="main_title")
         # 新增选择目标语言
         lang = select_target_language(label="标题生成语言")
     col1, col2 = st.columns(2)
