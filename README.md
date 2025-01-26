@@ -1,7 +1,7 @@
 ![LiberSonora Logo](./assets/logo.jpg)
 
 
-LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的、开源的有声书工具集，全程离线，支持 GPU 加速、批量处理及自定义大模型
+LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的、开源有声书工具集，包含智能字幕提取、AI标题生成、多语言翻译等功能，支持 GPU 加速、批量离线处理
 
 > 使用 Deepseek + Cursor 开发 ❤
 
