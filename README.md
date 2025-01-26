@@ -7,6 +7,8 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 中文版 | [English Version](README_en.md)
 
+项目官网及文档：[https://libersonora.github.io/](https://libersonora.github.io/)
+
 ## 🌟 项目亮点
 
 📚 **开源自由**
