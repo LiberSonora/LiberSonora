@@ -7,7 +7,7 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 中文版 | [English Version](README_en.md)
 
-项目官网及文档：[https://libersonora.github.io/](https://libersonora.github.io/)
+项目官网及最新文档：[https://libersonora.github.io/](https://libersonora.github.io/)
 
 ## 🌟 项目亮点
 
@@ -88,8 +88,9 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 > ⏳ 受个人时间和精力限制，项目进展可能较为缓慢。计划先实现一二期的核心功能，再逐步完善细节。
 
-> 💖 如果您喜欢这个项目，欢迎赞助支持我们的开发！
-> ![赞助二维码](./assets/rewardcode.png)
+💖 如果您喜欢这个项目，欢迎赞助支持我们的开发！
+
+<img src="assets/wechatpay.png" width="400" alt="赞助二维码" style="display: inline">
 
 
 ## 功能列表
@@ -158,61 +159,8 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 > 相比之下，目前的商业播放器在本地有声书播放场景上，还是网易云兼容性好点，但网易云的本地音乐没有进度记录或已播放的功能，切回到他的在线音乐之后很难找回进度，这也是想做全平台开源有声书播放器的原因之一
 
-![image](./assets/163-sub.png)
-![image](./assets/163-sub-multilang.png)
-
-
-## 🖥️ 功能界面展示
-
-### 🤖 多模型选择页面
-<div align="center">
-  <img src="assets/multi-llm.png" alt="多模型选择界面" width="80%">
-  <p><i>灵活的模型选择，支持本地Ollama、DeepSeek和OpenAI等多种大模型</i></p>
-</div>
-
-#### 支持的大模型供应商
-- **Ollama**: 本地运行的轻量级大模型服务，支持多种开源模型，适合本地部署
-- **DeepSeek**: 深度求索提供的API服务，中文处理能力强，性能优异
-- **OpenAI**: 全球领先的AI服务提供商，模型性能强大但需要网络连接
-
-#### 支持的模型列表
-| 供应商 | 模型名称 | 说明 |
-|--------|----------|------|
-| Ollama | Qwen2.5-7B-Instruct-Q4_K_M | 强大的多语言模型，支持多种任务，性能优异 |
-| Ollama | Qwen2.5-14B-Instruct-Q4_K_M | 更强大的多语言模型，性能更优但速度较慢 |
-| Ollama | minicpm3-4B-Q4_K_M | 本地运行的轻量模型，运行速度快 |
-| DeepSeek | DeepSeek Chat | 深度求索的对话模型，适合中文场景 |
-| DeepSeek | DeepSeek R1 | 深度求索的COT推理模型，质量更好但更慢 |
-| OpenAI | GPT-4O | OpenAI的最强模型，性能最好但成本较高 |
-| OpenAI | GPT-3.5 Turbo | OpenAI的快速模型，性价比高 |
-
-> 提示：可根据任务需求灵活选择不同模型，本地模型无需网络连接，云端模型性能更强但需要API密钥
-
-
-### 📚 批量处理有声书页面
-<div align="center">
-  <img src="assets/main-function.png" alt="批量处理功能界面" width="80%">
-  <p><i>强大的批量处理功能，轻松处理大量有声书</i></p>
-</div>
-
-### 🖥️ 服务器本地音频处理页面
-<div align="center">
-  <img src="assets/local-audio.png" alt="服务器本地音频处理界面" width="80%">
-  <p><i>高效处理服务器本地音频文件，省去文件传输步骤，提升处理效率</i></p>
-</div>
-
-### 🔍 手动检查输出结果页面
-<div align="center">
-  <img src="assets/manual-check.png" alt="手动检查输出结果界面" width="80%">
-  <p><i>便捷的手动检查功能，可手动命名也可让 AI 重新生成</i></p>
-</div>
-
-
-### 🧪 独立服务测试页面
-<div align="center">
-  <img src="assets/single-test.png" alt="独立服务测试界面" width="80%">
-  <p><i>灵活的单一服务测试，快速验证各项功能</i></p>
-</div>
+<img src="assets/163-sub.png" width="400" alt="字幕效果" style="display: inline">
+<img src="assets/163-sub-multilang.png" width="400" alt="多语言字幕效果" style="display: inline">
 
 
 ## 快速开始
@@ -244,78 +192,6 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 6. API 端点：
    API 服务可通过 `xxx.xxx.xxx.xxx:8652` 访问（将 xxx.xxx.xxx.xxx 替换为您的服务器 IP 地址）
-
-## API 接口文档
-
-### 批量处理音频
-
-> 注意：建议仅在内网环境中调用此接口，或者在外部调用时添加 OSS 上传下载的逻辑层。
-
-**请求 URL:** `http://xxx.xxx.xxx.xxx:8652/handle`
-
-**请求方法:** POST
-
-**请求头：**
-```
-Content-Type: multipart/form-data
-```
-
-**请求参数：**
-
-| 参数名 | 类型 | 说明 |
-|--------|------|------|
-| files  | File | 要处理的音频文件，支持多文件上传 |
-| config | JSON | 处理配置，可从 UI 的"预览配置"处获取 |
-
-![config](assets/config.png)
-
-**示例请求：**
-
-```bash
-curl --location --request POST 'http://xxx.xxx.xxx.xxx:8652/handle' \
---header 'User-Agent: Apifox/1.0.0 (https://apifox.com)' \
---form 'files=@"/path/to/your/audiofile.mp3"' \
---form 'config="{}"'
-```
-
-**响应：**
-
-接口响应为一个 zip 压缩包，可以点击下载 [多语言字幕](./assets/test-multilang.zip) 和 [原始字幕](./assets/test-single.zip) 测试结果
-
-- aaa.mp3
-- aaa.srt
-- aaaa.lcr
-- bbb.mp3
-- bbb.srt
-- bbb.lcr
-
-
-## 系统要求
-
-| 组件 | 最低要求 | 备注 |
-|------|----------|------|
-| 显存 | 8GB 或更高 | 4GB NVIDIA GPU 也能运行但速度较慢 |
-| 内存 | 16GB 或更高 | |
-| 磁盘空间 | 50GB 以上 | |
-
-### 性能测试
-
-> 配置和环境：e3-1275v5 + 2080ti + 32GB DDR4，Ubuntu 22.04
-
-![image](./assets/nvidia-smi.png)
-
-
-5分钟有声书，共902字，所有功能拉满，总耗时 42.56s，但一般只需要生成字幕+标题生成，只需要 9s 即可执行完毕
-
-| 处理项目 | 耗时 |
-|----------|---------------------|
-| 背景音移除 | 13.01s |
-| 生成字幕 | 8.83s |
-| 文本矫正 | 11.26s |
-| 多语言翻译 | 11.03s |
-| 标题生成 | 0.23s |
-
-> 使用“处理服务器本地音频”页面功能更适合文件批量处理，只需要放到 `/mnt/data/xxx/` 目录下然后给定配置即可，直接在服务器本地处理可以省去很多文件上传下载、打包的资源消耗，还可以变相实现离线处理，等待生成完毕即可
 
 ## 开源项目
 

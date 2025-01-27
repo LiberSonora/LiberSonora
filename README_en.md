@@ -6,6 +6,8 @@ LiberSonora, meaning "Free Voice", is an AI-powered, powerful, open-source audio
 
 [中文版](README.md) | English Version
 
+Project website and latest documentation: [https://libersonora.github.io/](https://libersonora.github.io/) (Chinese only)
+
 ## 🌟 Project Highlights
 
 📚 **Open Source Freedom**
@@ -82,8 +84,10 @@ If interested, please visit [🎧 Cross-platform Audiobook Player Requirements D
 
 > ⏳ Project progress may be slow due to personal time and energy constraints. Plan to implement core features of Phase 1 and 2 first, then gradually improve details.
 
-> 💖 If you like this project, welcome to sponsor our development!
-> ![Sponsor QR Code](./assets/rewardcode.png)
+💖 If you like this project, welcome to sponsor our development!
+
+<img src="assets/wechatpay.png" width="400" alt="赞助二维码" style="display: inline">
+
 
 ## Feature List
 
@@ -150,8 +154,8 @@ If interested, please visit [🎧 Cross-platform Audiobook Player Requirements D
 
 > Compared to current commercial players, NetEase Cloud has better compatibility for local audiobook playback, but its local music lacks progress recording or played status, making it hard to find progress after switching to online music, which is one reason for wanting to create a cross-platform open-source audiobook player
 
-![image](./assets/163-sub.png)
-![image](./assets/163-sub-multilang.png)
+<img src="assets/163-sub.png" width="400" alt="字幕效果" style="display: inline">
+<img src="assets/163-sub-multilang.png" width="400" alt="多语言字幕效果" style="display: inline">
 
 ## 🖥️ Feature Interface Showcase
 
