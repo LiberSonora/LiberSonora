@@ -154,16 +154,13 @@ If interested, please visit [🎧 Cross-platform Audiobook Player Requirements D
 
 > Compared to current commercial players, NetEase Cloud has better compatibility for local audiobook playback, but its local music lacks progress recording or played status, making it hard to find progress after switching to online music, which is one reason for wanting to create a cross-platform open-source audiobook player
 
-<img src="assets/163-sub.png" width="400" alt="字幕效果" style="display: inline">
-<img src="assets/163-sub-multilang.png" width="400" alt="多语言字幕效果" style="display: inline">
+<img src="assets/163-title-generated.png" width="300" alt="标题生成效果" style="display: inline">
+<img src="assets/163-sub.png" width="300" alt="字幕效果" style="display: inline">
+<img src="assets/163-sub-multilang.png" width="300" alt="多语言字幕效果" style="display: inline">
+
+
 
 ## 🖥️ Feature Interface Showcase
-
-### 🤖 Multi-model Selection Page
-<div align="center">
-  <img src="assets/multi-llm.png" alt="Multi-model Selection Interface" width="80%">
-  <p><i>Flexible model selection, supports local Ollama, DeepSeek and OpenAI etc.</i></p>
-</div>
 
 #### Supported Large Model Providers
 - **Ollama**: Lightweight large model service running locally, supports multiple open-source models, suitable for local deployment
@@ -183,29 +180,11 @@ If interested, please visit [🎧 Cross-platform Audiobook Player Requirements D
 
 > Tip: Can flexibly choose different models based on task requirements, local models don't require internet connection, cloud models have better performance but require API keys
 
-### 📚 Batch Audiobook Processing Page
-<div align="center">
-  <img src="assets/main-function.png" alt="Batch Processing Interface" width="80%">
-  <p><i>Powerful batch processing function, easily handle large quantities of audiobooks</i></p>
-</div>
 
-### 🖥️ Server Local Audio Processing Page
-<div align="center">
-  <img src="assets/local-audio.png" alt="Server Local Audio Processing Interface" width="80%">
-  <p><i>Efficiently process server local audio files, saving file transfer steps, improving processing efficiency</i></p>
-</div>
-
-### 🔍 Manual Output Check Page
-<div align="center">
-  <img src="assets/manual-check.png" alt="Manual Output Check Interface" width="80%">
-  <p><i>Convenient manual check function, can manually name or let AI regenerate</i></p>
-</div>
-
-### 🧪 Independent Service Test Page
-<div align="center">
-  <img src="assets/single-test.png" alt="Independent Service Test Interface" width="80%">
-  <p><i>Flexible single service testing, quickly verify various functions</i></p>
-</div>
+| **🤖 Multi-model Selection** | **📚 Batch Audiobook Processing** | **🖥️ Server Local Audio Processing** | **🔍 Manual Output Check** | **🧪 Independent Service Test** |
+|-------------------|-----------------------|---------------------------|-------------------------|---------------------|
+| Flexible model selection, supports multiple large models including local Ollama, DeepSeek and OpenAI | Powerful batch processing function, easily handles large quantities of audiobooks | Offline processing of server local audio files, eliminates file transfer steps, improves processing efficiency | Convenient manual check function, allows manual naming or AI regeneration | Flexible single service testing, quickly verifies various functions |
+| ![Multi-model Selection Interface](assets/multi-llm.png) | ![Batch Processing Interface](assets/main-function.png) | ![Server Local Audio Processing Interface](assets/local-audio.png) | ![Manual Output Check Interface](assets/manual-check.png) | ![Independent Service Test Interface](assets/single-test.png) |
 
 ## Quick Start
 
@@ -259,7 +238,7 @@ Content-Type: multipart/form-data
 | files     | File | Audio files to process, supports multiple file uploads |
 | config    | JSON | Processing configuration, can be obtained from UI's "Preview Config" |
 
-![config](assets/config.png)
+<img src="assets/config.png" width="400" alt="Configuration Preview" style="display: inline">
 
 **Example Request:**
 
@@ -294,7 +273,7 @@ The interface response is a zip file, you can click to download [multilingual su
 
 > Configuration and Environment: e3-1275v5 + 2080ti + 32GB DDR4, Ubuntu 22.04
 
-![image](./assets/nvidia-smi.png)
+<img src="./assets/nvidia-smi.png" width="400" alt="nvidia-smi performance" style="display: inline">
 
 
 5-minute audiobook, 902 words, all features enabled, total time 42.56s, but usually only needs subtitle generation + title generation, takes only 9s to complete

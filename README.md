@@ -159,8 +159,9 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 > 相比之下，目前的商业播放器在本地有声书播放场景上，还是网易云兼容性好点，但网易云的本地音乐没有进度记录或已播放的功能，切回到他的在线音乐之后很难找回进度，这也是想做全平台开源有声书播放器的原因之一
 
-<img src="assets/163-sub.png" width="400" alt="字幕效果" style="display: inline">
-<img src="assets/163-sub-multilang.png" width="400" alt="多语言字幕效果" style="display: inline">
+<img src="assets/163-title-generated.png" width="300" alt="标题生成效果" style="display: inline">
+<img src="assets/163-sub.png" width="300" alt="字幕效果" style="display: inline">
+<img src="assets/163-sub-multilang.png" width="300" alt="多语言字幕效果" style="display: inline">
 
 
 ## 快速开始
