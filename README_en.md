@@ -350,6 +350,10 @@ If you encounter any problems or have suggestions for improvement while using th
 
 We will carefully review every issue and respond as soon as possible.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=LiberSonora/LiberSonora&type=Date)](https://star-history.com/#LiberSonora/LiberSonora&Date)
+
 ## Open Source License
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
