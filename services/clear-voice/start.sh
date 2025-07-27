@@ -17,7 +17,7 @@ fi
 
 # 如果代码仓库不存在，克隆指定版本
 if [ ! -d "studio" ]; then
-    git clone https://cf.ghproxy.cc/https://github.com/modelscope/ClearerVoice-Studio.git studio
+    git clone https://github.com/modelscope/ClearerVoice-Studio.git studio
     cd studio/
     git checkout 41cbe4d6f902af9e911d098fdf0f76bb2bd49c02
     cd ..
