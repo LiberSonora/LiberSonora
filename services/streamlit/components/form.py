@@ -98,14 +98,14 @@ async def model_selection(key_prefix: str = "default"):
     """
     # 初始化session_state中的配置项，按key_prefix区分
     config_key = f'llm_config_{key_prefix}'
-    default_provider_name = PROVIDER_OLLAMA
+    default_provider_name = PROVIDER_DEEPSEEK
     default_provider = getProvider(default_provider_name)
     default_provider_config = getModelConfig(default_provider_name)
 
     if config_key not in st.session_state:
         st.session_state[config_key] = {
             'model': default_provider_config[0]['model'],
-            'use_ollama': True,
+            'use_ollama': False,
             'openai_url': default_provider["endpoint"],
             'openai_key': "",
             "provider": default_provider_name
