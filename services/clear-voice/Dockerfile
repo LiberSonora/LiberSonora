@@ -32,7 +32,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir huggingface-hub
 
 # 克隆 ClearerVoice-Studio 代码仓库
-RUN git clone https://cf.ghproxy.cc/https://github.com/modelscope/ClearerVoice-Studio.git studio && \
+RUN git clone https://github.com/modelscope/ClearerVoice-Studio.git studio && \
     cd studio && \
     git checkout 41cbe4d6f902af9e911d098fdf0f76bb2bd49c02 && \
     cd ..
