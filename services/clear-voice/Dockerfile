@@ -28,13 +28,32 @@ COPY requirements.txt .
 # 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制应用代码
-COPY . .
+# 安装 huggingface-hub 用于模型下载
+RUN pip install --no-cache-dir huggingface-hub
+
+# 克隆 ClearerVoice-Studio 代码仓库
+RUN git clone https://cf.ghproxy.cc/https://github.com/modelscope/ClearerVoice-Studio.git studio && \
+    cd studio && \
+    git checkout 41cbe4d6f902af9e911d098fdf0f76bb2bd49c02 && \
+    cd ..
+
+# 安装 studio 的依赖
+RUN pip install --no-cache-dir -r studio/requirements.txt
 
 # 创建模型目录
 RUN mkdir -p studio/clearvoice/checkpoints/MossFormer2_SE_48K \
     && mkdir -p studio/clearvoice/checkpoints/FRCRN_SE_16K \
     && mkdir -p studio/clearvoice/checkpoints/MossFormerGAN_SE_16K
+
+# 下载所有模型到构建镜像中
+RUN cd studio/clearvoice/checkpoints && \
+    huggingface-cli download --resume-download alibabasglab/MossFormer2_SE_48K --local-dir MossFormer2_SE_48K && \
+    huggingface-cli download --resume-download alibabasglab/FRCRN_SE_16K --local-dir FRCRN_SE_16K && \
+    huggingface-cli download --resume-download alibabasglab/MossFormerGAN_SE_16K --local-dir MossFormerGAN_SE_16K && \
+    cd ../../..
+
+# 复制应用代码
+COPY . .
 
 # 设置启动脚本权限
 RUN chmod +x docker-entrypoint.sh
