@@ -9,11 +9,11 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制requirements文件
-COPY requirements.txt .
+# 配置pip镜像源
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 安装Python依赖
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir streamlit sanic ffmpeg aiohttp st-diff-viewer streamlit-antd-components
 
 # 复制应用代码
 COPY . .
