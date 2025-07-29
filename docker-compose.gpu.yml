@@ -42,9 +42,9 @@ services:
     volumes:
       # mount whatever you want to process
       - /mnt/data:/mnt/data
-    ports:
-      - 8502:8501 # UI
-      - 8503:8000 # API
+    # ports:
+    #   - 8502:8501 # UI
+    #   - 8503:8000 # API
     environment:
       - WORKER_COUNT=${WORKER_COUNT:-1}
     deploy:
@@ -64,9 +64,9 @@ services:
       - /mnt/data:/mnt/data
       # 模型缓存
       - ./services/funasr/.cache/:/root/.cache/
-    ports:
-      - 8504:8501 # UI
-      - 8505:8000 # API
+    # ports:
+    #   - 8504:8501 # UI
+    #   - 8505:8000 # API
     environment:
       - WORKER_COUNT=${WORKER_COUNT:-1}
     deploy:

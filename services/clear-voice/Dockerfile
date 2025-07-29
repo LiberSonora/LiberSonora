@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.11-slim
 
 # 设置工作目录
 WORKDIR /app
@@ -16,13 +16,13 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 RUN pip install --upgrade pip
 
 # 安装基础包和 ClearVoice
-RUN pip install streamlit requests sanic huggingface_hub torch torchaudio
+RUN pip install streamlit requests sanic==24.6.0 huggingface_hub torch torchaudio
 
 	# 安装 ClearVoice（避免复杂的源码编译）
 RUN pip install clearvoice
 
-# 设置环境变量
-ENV HF_ENDPOINT=https://hf-mirror.com
+# 设置 huggingfacing 代理，但国内也很慢
+# ENV HF_ENDPOINT=https://hf-mirror.com
 
 # 复制应用代码
 COPY . /app/
