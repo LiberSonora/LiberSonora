@@ -63,7 +63,7 @@ async def process_single_audio(index, audio_file, config, temp_dir):
         
         # 标题生成
         title = "未生成"
-        if config.get("title", {}).get("generate", False):
+        if config.get("title", {}).get("generate", False) and not config.get("title", {}).get("skip_rename", False):
             logger.info("正在进行标题生成")
             title_start = datetime.now()
             openai_config = config["title"]["openai"]
@@ -140,13 +140,17 @@ async def process_single_audio(index, audio_file, config, temp_dir):
             lrc_path = os.path.join(temp_dir, f"{base_name}-{counter}.lrc")
             counter += 1
         
-        with open(audio_path, "wb") as f:
-            f.write(audio_file.body)  # 保存原始音频文件
+        # 只有当不跳过标题重命名时才保存音频文件
+        if not config.get("title", {}).get("skip_rename", False):
+            with open(audio_path, "wb") as f:
+                f.write(audio_file.body)  # 保存原始音频文件
+            logger.info(f"音频文件保存完成")
+        
         with open(srt_path, "w", encoding="utf-8") as f:
             f.write(srt_content)
         with open(lrc_path, "w", encoding="utf-8") as f:
             f.write(lrc_content)
-        logger.info(f"文件保存完成，耗时 {(datetime.now() - save_start).total_seconds():.2f} 秒")
+        logger.info(f"字幕文件保存完成，耗时 {(datetime.now() - save_start).total_seconds():.2f} 秒")
         
         logger.info(f"第 {index + 1} 个音频处理完成，总耗时 {(datetime.now() - start_time).total_seconds():.2f} 秒")
         return audio_path
@@ -216,10 +220,10 @@ def check_offline_task_output(output_dir: str) -> list:
         
     返回:
         包含音频文件信息的列表，每个元素为字典，包含：
-        - audio_path: 音频文件绝对路径
+        - audio_path: 音频文件绝对路径（可能不存在）
         - srt_path: srt字幕文件绝对路径
         - lrc_path: lrc字幕文件绝对路径  
-        - relative_path: 音频文件相对路径
+        - relative_path: 相对路径
         - has_srt: srt文件是否存在
         - has_lrc: lrc文件是否存在
     """
@@ -228,34 +232,62 @@ def check_offline_task_output(output_dir: str) -> list:
     
     # 支持的音频文件扩展名
     audio_extensions = ['mp3', 'wav', 'pem']
+    # 支持的字幕文件扩展名
+    subtitle_extensions = ['srt', 'lrc']
     
     # 查找所有音频文件
     audio_files = []
     for ext in audio_extensions:
         audio_files.extend(glob(os.path.join(output_dir, '**', f'*.{ext}'), recursive=True))
     
-    result = []
+    # 查找所有字幕文件
+    subtitle_files = []
+    for ext in subtitle_extensions:
+        subtitle_files.extend(glob(os.path.join(output_dir, '**', f'*.{ext}'), recursive=True))
+    
+    # 创建结果字典，以文件名为键
+    result_dict = {}
+    
+    # 处理音频文件
     for audio_path in audio_files:
         # 获取相对路径
         relative_path = os.path.relpath(audio_path, output_dir)
         
         # 获取文件名（不含扩展名）
         base_name = os.path.splitext(audio_path)[0]
+        file_key = os.path.relpath(base_name, output_dir)
         
-        # 检查字幕文件
-        srt_path = f"{base_name}.srt"
-        lrc_path = f"{base_name}.lrc"
-        
-        result.append({
+        result_dict[file_key] = {
             'audio_path': audio_path,
-            'srt_path': srt_path,
-            'lrc_path': lrc_path,
+            'srt_path': f"{base_name}.srt",
+            'lrc_path': f"{base_name}.lrc",
             'relative_path': relative_path,
-            'has_srt': os.path.exists(srt_path),
-            'has_lrc': os.path.exists(lrc_path)
-        })
+            'has_srt': os.path.exists(f"{base_name}.srt"),
+            'has_lrc': os.path.exists(f"{base_name}.lrc")
+        }
     
-    # 按照relative_path进行排序
+    # 处理字幕文件（可能没有对应的音频文件）
+    for subtitle_path in subtitle_files:
+        # 获取相对路径
+        relative_path = os.path.relpath(subtitle_path, output_dir)
+        
+        # 获取文件名（不含扩展名）
+        base_name = os.path.splitext(subtitle_path)[0]
+        file_key = os.path.relpath(base_name, output_dir)
+        
+        if file_key not in result_dict:
+            # 如果没有对应的音频文件，创建一个条目
+            result_dict[file_key] = {
+                'audio_path': None,  # 没有音频文件
+                'srt_path': f"{base_name}.srt",
+                'lrc_path': f"{base_name}.lrc",
+                'relative_path': relative_path,
+                'has_srt': os.path.exists(f"{base_name}.srt"),
+                'has_lrc': os.path.exists(f"{base_name}.lrc")
+            }
+    
+    # 转换为列表并排序
+    result = list(result_dict.values())
     result.sort(key=lambda x: x['relative_path'])
     
     return result
@@ -268,7 +300,7 @@ async def ai_rename_files(openai_config, book_title, author, lang, audio_path, l
         book_title: 书名
         author: 作者
         lang: 语言
-        audio_path: 音频文件路径
+        audio_path: 音频文件路径（可能为None）
         lrc_path: lrc字幕文件路径
         srt_path: srt字幕文件路径
         

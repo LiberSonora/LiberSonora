@@ -72,7 +72,7 @@ DEEPSEEK_MODEL_CONFIG = [
     {
         "model": "deepseek-chat",
         "name": "DeepSeek Chat",
-        "comment": "深度求索的对话模型，适合中文场景",
+        "comment": "深度求索的对话模型，适合中文场景，默认推荐",
     },
     {
         "model": "deepseek-r1",

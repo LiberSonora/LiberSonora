@@ -1,4 +1,7 @@
 import asyncio
+import subprocess
+import sys
+import os
 
 async def read_output(stream, prefix):
     while True:
@@ -23,6 +26,8 @@ async def run_scripts():
         'streamlit',
         'run',
         'ui.py',
+        '--server.port=8501',
+        '--server.address=0.0.0.0',
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
     )
@@ -39,4 +44,12 @@ async def run_scripts():
     await asyncio.gather(*tasks)
 
 if __name__ == "__main__":
-    asyncio.run(run_scripts())
+    # 检查是否在Docker环境中
+    if os.path.exists('/.dockerenv'):
+        print("Running in Docker container")
+    
+    try:
+        asyncio.run(run_scripts())
+    except KeyboardInterrupt:
+        print("Shutting down services...")
+        sys.exit(0)

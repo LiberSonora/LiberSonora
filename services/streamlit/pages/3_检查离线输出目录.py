@@ -131,26 +131,34 @@ async def render_page():
         for index, row in edited_df.iterrows():
             if row['操作']:
                 with st.form(key=f"rename_form_{index}"):
-                    # 渲染音频播放器
-                    st.audio(results[index]['audio_path'], format='audio/wav')
+                    # 渲染音频播放器（如果音频文件存在）
+                    if results[index]['audio_path'] and os.path.exists(results[index]['audio_path']):
+                        st.audio(results[index]['audio_path'], format='audio/wav')
+                    else:
+                        st.info("没有对应的音频文件，只有字幕文件")
                     
-                    new_name = st.text_input("新文件名", value=os.path.splitext(os.path.basename(results[index]['audio_path']))[0])
+                    # 获取基础文件名用于重命名
+                    base_name = os.path.splitext(os.path.basename(results[index]['srt_path']))[0] if results[index]['srt_path'] else "unknown"
+                    new_name = st.text_input("新文件名", value=base_name)
                     col1, col2 = st.columns([4, 1])
                     with col2:
                         if st.form_submit_button("应用"):
-                            # 获取文件扩展名
-                            ext = os.path.splitext(results[index]['audio_path'])[1]
-                            new_audio_path = os.path.join(os.path.dirname(results[index]['audio_path']), new_name + ext)
-                            new_srt_path = os.path.join(os.path.dirname(results[index]['srt_path']), new_name + ".srt")
-                            new_lrc_path = os.path.join(os.path.dirname(results[index]['lrc_path']), new_name + ".lrc")
-                            
-                            # 重命名文件
                             try:
-                                os.rename(results[index]['audio_path'], new_audio_path)
+                                # 重命名字幕文件
                                 if os.path.exists(results[index]['srt_path']):
+                                    new_srt_path = os.path.join(os.path.dirname(results[index]['srt_path']), new_name + ".srt")
                                     os.rename(results[index]['srt_path'], new_srt_path)
+                                
                                 if os.path.exists(results[index]['lrc_path']):
+                                    new_lrc_path = os.path.join(os.path.dirname(results[index]['lrc_path']), new_name + ".lrc")
                                     os.rename(results[index]['lrc_path'], new_lrc_path)
+                                
+                                # 重命名音频文件（如果存在）
+                                if results[index]['audio_path'] and os.path.exists(results[index]['audio_path']):
+                                    ext = os.path.splitext(results[index]['audio_path'])[1]
+                                    new_audio_path = os.path.join(os.path.dirname(results[index]['audio_path']), new_name + ext)
+                                    os.rename(results[index]['audio_path'], new_audio_path)
+                                
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"重命名失败: {str(e)}")

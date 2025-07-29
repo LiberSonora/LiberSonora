@@ -155,33 +155,42 @@ async def step_correct_config():
 
 async def step_title_config():
     st.subheader("文件名配置")
-    generate_title = st.checkbox("自动总结标题", value=True, help="如果开启，则会利用大模型从识别的文本中进行总结")
+    
+    # 增加"不做标题重命名"选项，默认选中
+    skip_title_rename = st.checkbox("不做标题重命名", value=True, help="选中后不进行标题重命名，只生成字幕文件")
+    
+    generate_title = st.checkbox("自动总结标题", value=False, help="如果开启，则会利用大模型从识别的文本中进行总结", disabled=skip_title_rename)
     openai_config = None
     lang="zh-CN"
-    if generate_title:
+    
+    # 只有在不跳过标题重命名且开启标题生成时才显示相关配置
+    if not skip_title_rename and generate_title:
         openai_config = await model_selection(key_prefix="main_title")
         # 新增选择目标语言
         lang = select_target_language(label="标题生成语言")
+    
     col1, col2 = st.columns(2)
     with col1:
-        book_title = st.text_input("书名（可选）", value="")
+        book_title = st.text_input("书名（可选）", value="", disabled=skip_title_rename)
     with col2:
-        author = st.text_input("作者（可选）", value="")
+        author = st.text_input("作者（可选）", value="", disabled=skip_title_rename)
     
     
     regex_origin = st.text_input("文件名正则表达式", value="(\\d+)",
-                                help="用于从原始文件名中提取数据")
-    rule = st.text_input("文件名生成规则", value="{0}_{title}")
-    with st.expander("文件名生成规则说明", expanded=True):
-        st.write('''
-            - origin: 原始文件名
-            - index: 文件序号（请注意可能导致乱序）
-            - title: 生成的标题
-            - book_title: 书名
-            - author: 作者
-            - 0,1,2...: 从正则表达式中提取的匹配组
-            示例：{origin}\_{index}\_{title}\_{book_title}\_{author}\_{0}
-        ''')
+                                help="用于从原始文件名中提取数据", disabled=skip_title_rename)
+    rule = st.text_input("文件名生成规则", value="{0}_{title}", disabled=skip_title_rename)
+    
+    if not skip_title_rename:
+        with st.expander("文件名生成规则说明", expanded=True):
+            st.write('''
+                - origin: 原始文件名
+                - index: 文件序号（请注意可能导致乱序）
+                - title: 生成的标题
+                - book_title: 书名
+                - author: 作者
+                - 0,1,2...: 从正则表达式中提取的匹配组
+                示例：{origin}\_{index}\_{title}\_{book_title}\_{author}\_{0}
+            ''')
     
     # 兼容 uploaded_files 和 uploaded_file_paths
     files = []
@@ -190,7 +199,7 @@ async def step_title_config():
     elif 'uploaded_files' in st.session_state:
         files = [(os.path.basename(file.name), file) for file in st.session_state.uploaded_files]
     
-    if files:
+    if files and not skip_title_rename:
         sample_data = []
         for i, (file_name, file) in enumerate(files):
             base_name = os.path.splitext(file_name)[0]
@@ -209,6 +218,7 @@ async def step_title_config():
         st.dataframe(sample_data)
     
     st.session_state.config['title'] = {
+        'skip_rename': skip_title_rename,
         'generate': generate_title,
         'book_title': book_title,
         'author': author,
