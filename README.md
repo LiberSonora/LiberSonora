@@ -108,6 +108,10 @@ LiberSonora，寓意“自由的声音”，是一个 AI 赋能的、强大的�
 
 我们会认真查看每一个 issue，并尽快回复。
 
+## Star 历史
+
+[![Star History Chart](https://api.star-history.com/svg?repos=LiberSonora/LiberSonora&type=Date)](https://star-history.com/#LiberSonora/LiberSonora&Date)
+
 ## 开源许可
 
 本项目采用 [MIT 许可证](https://opensource.org/licenses/MIT)。
