@@ -3,9 +3,6 @@ import tempfile
 from io import BytesIO
 import sys
 
-studio_path = os.path.join(os.path.dirname(__file__), '../studio/clearvoice/')
-sys.path.append(studio_path)
-os.chdir(studio_path)
 from clearvoice import ClearVoice
 
 def process_audio(audio_bytes: BytesIO, model: str) -> BytesIO:
