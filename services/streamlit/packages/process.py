@@ -30,10 +30,10 @@ async def process_single_audio(index, audio_file, config, temp_dir):
         convert_start = datetime.now()
         logger.info(f"音频格式转换完成，耗时 {(datetime.now() - convert_start).total_seconds():.2f} 秒")
         
+        wav_audio = await convert_to_wav(audio_file.body)
         # 背景音移除
         if config.get("remove_background", False):
             logger.info("正在进行背景音移除")
-            wav_audio = await convert_to_wav(audio_file.body)
             enhance_start = datetime.now()
             wav_audio = await enhance_audio(wav_audio, model_name="enhance_model")
             logger.info(f"背景音移除完成，耗时 {(datetime.now() - enhance_start).total_seconds():.2f} 秒")
@@ -41,7 +41,7 @@ async def process_single_audio(index, audio_file, config, temp_dir):
         # 语音转文字
         stt_start = datetime.now()
         hotwords = config.get("subtitle", {}).get("hotwords", "")
-        subtitles = format_speech_results(await speech_to_text(audio_file.body, hotwords=hotwords))
+        subtitles = format_speech_results(await speech_to_text(wav_audio, hotwords=hotwords))
         text_lines = [s['text'] for s in subtitles]
         logger.info(f"语音转文字完成，耗时 {(datetime.now() - stt_start).total_seconds():.2f} 秒")
         
